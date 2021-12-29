@@ -1,5 +1,8 @@
 # idea相关的配置文件忽略掉
 .idea/
+# 用于测试的代码不被添加到项目
+test*
+demo*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
