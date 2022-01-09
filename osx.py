@@ -2,7 +2,7 @@ from os import walk, listdir, path
 from pathlib import Path
 
 
-def walk_files(path_str=".", extension="", *, nopath=False):
+def walk_files(path_str=".", extension="", *, nopath=False, followlinks=False):
     """
         返回包含指定路径下的所有文件列表
         extension 表示文件后缀名,不带. 如果传入表示只返回相应后缀的文件
@@ -10,7 +10,7 @@ def walk_files(path_str=".", extension="", *, nopath=False):
     """
     files = []  # 放所有文件的列表
 
-    for curr_dir, _, file_list in walk(path_str):
+    for curr_dir, _, file_list in walk(path_str, followlinks=False):
         files += [file_name if nopath else str(Path(curr_dir, file_name))
                   for file_name in file_list
                   if file_name.endswith(extension)]
@@ -18,11 +18,11 @@ def walk_files(path_str=".", extension="", *, nopath=False):
     return files
 
 
-def walk_folders(path_str):
+def walk_folders(path_str, *, followlinks=False):
     """返回包含指定路径下的所有文件夹列表"""
     folders = []
 
-    for curr_dir, folder_list, _ in walk(path_str):
+    for curr_dir, folder_list, _ in walk(path_str, followlinks=False):
         folders += [str(Path(curr_dir,folder)) for folder in folder_list]
 
     return folders
