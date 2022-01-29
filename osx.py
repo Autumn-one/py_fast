@@ -86,9 +86,10 @@ def new_file(file_name,content=None,encoding="utf8"):
     encoding是文字编码
     """
     if content:
-        Path(file_name).touch()
-    else:
         Path(file_name).write_text(content,encoding=encoding)
+    else:
+        Path(file_name).touch()
+
 
 def remove(file_dir):
     """
