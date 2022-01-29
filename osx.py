@@ -52,17 +52,6 @@ def getFilesAndFolders(pathStr):
     return files, folders
 
 
-def is_file(path_obj):
-    """
-    判断传入的路径是否是文件
-    """
-    return path.isfile(path_obj)
-
-def is_dir(path_obj):
-    """
-    判断传入的路径是否是目录
-    """
-    return path.isdir(path_obj)
 
 
 def is_exists(path_obj):
