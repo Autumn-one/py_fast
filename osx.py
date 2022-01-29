@@ -4,6 +4,7 @@ from pathx import *  # 导入所有的路径增强函数
 from walkx import *  # 导入所有的递归访问文件夹的方法
 from pprint import *  # 导入所有的pprint的方法
 from shutil import * # 导入文件的高级操作部分
+import json
 
 
 def get_dirs(path_str=None, nopath=False):
@@ -72,3 +73,75 @@ def get_all(path_str, classify=False, nopath=False):
         return files, dirs
     else:
         return [*files, *dirs]
+
+
+# 创建一个目录
+new_dir = os.mkdir
+
+def new_file(file_name,content=None,encoding="utf8"):
+    """
+    创建一个文件
+    file_name 文件名称或者一个文件路径
+    content是一个可选的要假如文件的字符串内容
+    encoding是文字编码
+    """
+    if content:
+        Path(file_name).touch()
+    else:
+        Path(file_name).write_text(content,encoding=encoding)
+
+def remove(file_dir):
+    """
+    删除文件或者文件夹
+    file_dir 文件或目录名称或路径
+    """
+    if is_file(file_dir):
+        os.remove(file_dir)
+    else:
+        rmtree(file_dir)
+
+# 删除文件
+remove_file = os.remove
+
+# 删除文件夹
+remove_dir = rmtree
+
+def read_file(file_name,encoding="utf8"):
+    """
+    读取文件内容
+    """
+    with open(file_name,encoding=encoding) as f:
+        return f.read()
+
+def write_file(file_name,content,*,append=True,encoding="utf8"):
+    """
+    写入文件内容
+    append如果为True则是追加写入 False则是覆写
+    """
+    mode = "a" if append else "w" # 写入的模式是追加还是覆写
+    with open(file_name,mode,encoding=encoding) as f:
+        f.write(content)
+
+def read_json():
+    """
+    读取json文件返回的是一个py对象
+    """
+    pass
+
+def write_json():
+    """
+    将py对象写入到json文件
+    """
+    pass
+
+def str2obj():
+    """
+    字符串转换成py对象并返回
+    """
+    pass
+
+def obj2str():
+    """
+    py对象转换成字符串
+    """
+    pass
