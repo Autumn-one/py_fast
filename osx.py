@@ -146,3 +146,5 @@ def obj2str():
     py对象转换成字符串
     """
     pass
+
+copy_dir = copytree
