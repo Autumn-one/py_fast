@@ -3,7 +3,7 @@ from pathlib import Path
 from pathx import *  # 导入所有的路径增强函数
 from walkx import *  # 导入所有的递归访问文件夹的方法
 from pprint import *  # 导入所有的pprint的方法
-from shutil import *  # 导入文件的高级操作部分
+import shutil  # 导入文件的高级操作部分
 import json
 import ast
 
@@ -101,14 +101,14 @@ def remove(file_dir):
     if is_file(file_dir):
         os.remove(file_dir)
     else:
-        rmtree(file_dir)
+        shutil.rmtree(file_dir)
 
 
 # 删除文件
 remove_file = os.remove
 
 # 删除文件夹
-remove_dir = rmtree
+remove_dir = shutil.rmtree
 
 stat = os.stat
 
@@ -161,4 +161,23 @@ def obj2str(obj):
     return json.dumps(obj, check_circular=False)
 
 
-copy_dir = copytree
+def copy(src, dst, *, follow_symlinks=True, ignore=None):
+    """
+    用于复制文件或者文件夹的函数, 将src拷贝到dst
+    src 是一个文件或者目录, 路径字符串或者路径对象都行
+    dst 是一个文件或目录,如果是文件就是拷贝到指定的文件路径如果是目录且src不是目录就是拷贝到目录下面,如果是目录且src也是目录就是复制到路径
+    follow_symlinks 和 shutil.copy 的同名参数一致的意思
+    ignore 表示一个 glob 风格的忽略那些文件和目录, 注意这个参数可以提供一个或者多个,一个可以直接给出字符串, 多个用字符串元祖即可
+    """
+    if is_file(src):
+        return shutil.copy(src, dst, follow_symlinks=follow_symlinks)
+    else:
+
+        if type(ignore) == str:
+            ignore = (ignore,)
+        return shutil.copytree(src, dst, symlinks=not follow_symlinks, ignore=shutil.ignore_patterns(*ignore) if ignore else None)
+
+copy2 = shutil.copy2
+
+copy_file = shutil.copy
+copy_dir = shutil.copytree
