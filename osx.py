@@ -26,7 +26,7 @@ def get_dirs(path_str=None, nopath=False):
     return dirs
 
 
-def get_files(path_str, extension="", *, nopath=False, glob=None):
+def get_files(path_str=".", extension="", *, nopath=False, glob=None):
     """
     返回给定路径的直接子文件
     extension 表示后缀名不带点
