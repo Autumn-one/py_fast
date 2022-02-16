@@ -94,9 +94,9 @@ def new_file(file_name, content=None, encoding="utf8"):
         Path(file_name).touch()
 
 # 创建目录或者文件, 带后缀就是文件不带后缀就是目录
-def new(name: str):
-    if "." in name:
-        new_file(name)
+def new(name: str, content: str = None):
+    if "." in name or content: # 如果存在第二个 content 参数或者名字带点都认为是一个文件
+        new_file(name, content)
     else:
         new_dir(name)
 
