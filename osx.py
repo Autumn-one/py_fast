@@ -2,7 +2,6 @@ from os import walk, listdir, path
 from pathlib import Path
 from pathx import *  # 导入所有的路径增强函数
 from walkx import *  # 导入所有的递归访问文件夹的方法
-from pprint import *  # 导入所有的pprint的方法
 import shutil  # 导入文件的高级操作部分
 import json
 import ast
@@ -80,6 +79,8 @@ def get_all(path_str, classify=False, nopath=False):
 new_dir = os.mkdir
 
 
+
+
 def new_file(file_name, content=None, encoding="utf8"):
     """
     创建一个文件
@@ -91,6 +92,13 @@ def new_file(file_name, content=None, encoding="utf8"):
         Path(file_name).write_text(content, encoding=encoding)
     else:
         Path(file_name).touch()
+
+# 创建目录或者文件, 带后缀就是文件不带后缀就是目录
+def new(name: str):
+    if "." in name:
+        new_file(name)
+    else:
+        new_dir(name)
 
 
 def remove(file_dir):
@@ -161,13 +169,14 @@ def obj2str(obj):
     return json.dumps(obj, check_circular=False)
 
 
-def copy(src, dst, *, follow_symlinks=True, ignore=None):
+def copy(src, dst, *, follow_symlinks=True, ignore=None, glob=None):
     """
     用于复制文件或者文件夹的函数, 将src拷贝到dst
     src 是一个文件或者目录, 路径字符串或者路径对象都行
     dst 是一个文件或目录,如果是文件就是拷贝到指定的文件路径如果是目录且src不是目录就是拷贝到目录下面,如果是目录且src也是目录就是复制到路径
     follow_symlinks 和 shutil.copy 的同名参数一致的意思
     ignore 表示一个 glob 风格的忽略那些文件和目录, 注意这个参数可以提供一个或者多个,一个可以直接给出字符串, 多个用字符串元祖即可
+    glob 只在 src 是目录而时候有用, 表示通过通配符匹配来复制所有匹配到的文件到指定目录, 和ignore参数互斥
     """
     if is_file(src):
         return shutil.copy(src, dst, follow_symlinks=follow_symlinks)
@@ -175,9 +184,23 @@ def copy(src, dst, *, follow_symlinks=True, ignore=None):
 
         if type(ignore) == str:
             ignore = (ignore,)
-        return shutil.copytree(src, dst, symlinks=not follow_symlinks, ignore=shutil.ignore_patterns(*ignore) if ignore else None)
+
+        if glob: # 如果有通配符选项则是复制目录下指定通配符的文件到指定文件夹
+            files = walk_files(src,glob=glob)
+            for file in files:
+                shutil.copy(file,dst)
+
+        else:
+            return shutil.copytree(src, dst, symlinks=not follow_symlinks, ignore=shutil.ignore_patterns(*ignore) if ignore else None)
 
 copy2 = shutil.copy2
 
 copy_file = shutil.copy
 copy_dir = shutil.copytree
+
+
+def openx(*args,**kws):
+    """
+    默认utf8编码的open函数
+    """
+    return open(*args,**{**kws,"encoding":"utf8"})
