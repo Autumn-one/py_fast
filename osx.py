@@ -173,7 +173,7 @@ def obj2str(obj):
     return json.dumps(obj, check_circular=False)
 
 
-def copy(src, dst, *, follow_symlinks=True, ignore=None, glob=None):
+def copy(src=None, dst=None, *, follow_symlinks=True, ignore=None, glob=None):
     """
     用于复制文件或者文件夹的函数, 将src拷贝到dst
     src 是一个文件或者目录, 路径字符串或者路径对象都行
@@ -182,6 +182,9 @@ def copy(src, dst, *, follow_symlinks=True, ignore=None, glob=None):
     ignore 表示一个 glob 风格的忽略那些文件和目录, 注意这个参数可以提供一个或者多个,一个可以直接给出字符串, 多个用字符串元祖即可
     glob 只在 src 是目录而时候有用, 表示通过通配符匹配来复制所有匹配到的文件到指定目录, 和ignore参数互斥
     """
+    if not src:
+        src = cwd()
+
     if is_file(src):
         return shutil.copy(src, dst, follow_symlinks=follow_symlinks)
     else:
@@ -208,3 +211,10 @@ def openx(*args,**kws):
     默认utf8编码的open函数
     """
     return open(*args,**{**kws,"encoding":"utf8"})
+
+
+def cmd(cmd_str):
+    """
+    该方法接受一个cmd命令字符串, 执行这条命令
+    """
+    return os.popen(cmd_str,mode="r", buffering=-1)
