@@ -26,11 +26,12 @@ def get_dirs(path_str=None, nopath=False):
     return dirs
 
 
-def get_files(path_str, extension="", *, nopath=False):
+def get_files(path_str, extension="", *, nopath=False, glob=None):
     """
     返回给定路径的直接子文件
     extension 表示后缀名不带点
     nopath表示是狗返回完整路径,注意不一定是绝对路径
+    glob 表示使用通配符来匹配文件
     """
     files = []  # 存放最终结果的文件列表
 
@@ -40,11 +41,14 @@ def get_files(path_str, extension="", *, nopath=False):
     if extension:
         extension = "." + extension
 
-    for item in listdir(path_str):
-        item_path = Path(path_str, item)
-        if is_file(item_path) and item.endswith(extension):
-            final_path = item if nopath else str(item_path)
-            files.append(final_path)
+    if glob:
+        files = walk_files(path_str,nopath=nopath,glob=glob)
+    else:
+        for item in listdir(path_str):
+            item_path = Path(path_str, item)
+            if is_file(item_path) and item.endswith(extension):
+                final_path = item if nopath else str(item_path)
+                files.append(final_path)
 
     return files
 
