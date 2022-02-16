@@ -26,7 +26,7 @@ def get_dirs(path_str=None, nopath=False):
     return dirs
 
 
-def get_files(path_str=".", extension="", *, nopath=False, glob=None):
+def get_files(path_str=None, extension="", *, nopath=False, glob=None):
     """
     返回给定路径的直接子文件
     extension 表示后缀名不带点
@@ -53,7 +53,7 @@ def get_files(path_str=".", extension="", *, nopath=False, glob=None):
     return files
 
 
-def get_all(path_str, classify=False, nopath=False):
+def get_all(path_str=None, classify=False, nopath=False):
     """
     返回给定路径的直接文件列表和文件夹列表
     默认返回一个列表包含所有的文件和文件夹
