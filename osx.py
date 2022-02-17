@@ -42,7 +42,7 @@ def get_files(path_str=None, extension="", *, nopath=False, glob=None):
         extension = "." + extension
 
     if glob:
-        files = walk_files(path_str,nopath=nopath,glob=glob)
+        files = walk_files(path_str, nopath=nopath, glob=glob)
     else:
         for item in listdir(path_str):
             item_path = Path(path_str, item)
@@ -83,8 +83,6 @@ def get_all(path_str=None, classify=False, nopath=False):
 new_dir = os.mkdir
 
 
-
-
 def new_file(file_name, content=None, encoding="utf8"):
     """
     创建一个文件
@@ -97,9 +95,10 @@ def new_file(file_name, content=None, encoding="utf8"):
     else:
         Path(file_name).touch()
 
+
 # 创建目录或者文件, 带后缀就是文件不带后缀就是目录
 def new(name: str, content: str = None):
-    if "." in name or content: # 如果存在第二个 content 参数或者名字带点都认为是一个文件
+    if "." in name or content:  # 如果存在第二个 content 参数或者名字带点都认为是一个文件
         new_file(name, content)
     else:
         new_dir(name)
@@ -192,13 +191,18 @@ def copy(src=None, dst=None, *, follow_symlinks=True, ignore=None, glob=None):
         if type(ignore) == str:
             ignore = (ignore,)
 
-        if glob: # 如果有通配符选项则是复制目录下指定通配符的文件到指定文件夹
-            files = walk_files(src,glob=glob)
+        if glob:  # 如果有通配符选项则是复制目录下指定通配符的文件到指定文件夹
+            # 先判断目标文件夹存不存在;,如果不存在就创建
+            not is_exist(dst) and new_dir(dst)
+
+            files = walk_files(src, glob=glob)
             for file in files:
-                shutil.copy(file,dst)
+                shutil.copy(file, dst)
 
         else:
-            return shutil.copytree(src, dst, symlinks=not follow_symlinks, ignore=shutil.ignore_patterns(*ignore) if ignore else None)
+            return shutil.copytree(src, dst, symlinks=not follow_symlinks,
+                                   ignore=shutil.ignore_patterns(*ignore) if ignore else None)
+
 
 copy2 = shutil.copy2
 
@@ -206,15 +210,15 @@ copy_file = shutil.copy
 copy_dir = shutil.copytree
 
 
-def openx(*args,**kws):
+def openx(*args, **kws):
     """
     默认utf8编码的open函数
     """
-    return open(*args,**{**kws,"encoding":"utf8"})
+    return open(*args, **{**kws, "encoding": "utf8"})
 
 
 def cmd(cmd_str):
     """
     该方法接受一个cmd命令字符串, 执行这条命令
     """
-    return os.popen(cmd_str,mode="r", buffering=-1)
+    return os.popen(cmd_str, mode="r", buffering=-1)
