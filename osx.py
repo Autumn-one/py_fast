@@ -81,6 +81,13 @@ def get_all(path_str=None, classify=False, nopath=False):
 
 # 创建一个目录
 new_dir = os.mkdir
+# new_dirs = os.makedirs 应该让 new_dir 直接支持递归创建,通过一个参数可以关闭递归创建 news new_dirs 等都应该是能够一次创建多个文件的方法
+"""
+os.makedirs(name, mode=511, exist_ok=False)
+递归目录创建函数。与 mkdir() 类似，但会自动创建到达最后一级目录所需要的中间目录。
+
+mode 参数会传递给 mkdir()，用来创建最后一级目录，对于该参数的解释，请参阅 mkdir() 中的描述。要设置某些新建的父目录的权限，可以在调用 makedirs() 之前设置 umask。现有父目录的权限不会更改。
+"""
 
 
 def new_file(file_name, content=None, encoding="utf8"):
