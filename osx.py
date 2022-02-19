@@ -125,7 +125,7 @@ def new_file(path_str, content=None, encoding="utf8",* ,walk=True):
     encoding是文字编码
     walk 是否递归创建中间需要的所有目录
     """
-    base_path = path.basename(path_str)
+    base_path = path.dirname(path_str)
     if not is_exist(base_path) and walk:
         new_dir(base_path)
     else:
@@ -251,10 +251,12 @@ def copy(src=None, dst=None, *, follow_symlinks=True, ignore=None, glob=None):
     if not src:
         src = cwd()
 
-    if is_file(src):
+    if is_file(src): # 如果复制文件, 查看dst 目标路径中是否有不存在的目录,有就创建好在复制
+        base_path = path.dirname(dst)
+        if not is_exist(base_path):
+            new_dir(base_path)
         return shutil.copy(src, dst, follow_symlinks=follow_symlinks)
     else:
-
         if type(ignore) == str:
             ignore = (ignore,)
 
@@ -291,21 +293,20 @@ def cmd(cmd_str):
     return os.popen(cmd_str, mode="r", buffering=-1)
 
 
-def rename():
-    """
-    重命名一个文件或者文件夹
-    """
-    pass
+rename = os.rename
 
-def rename_file():
+def rename_file(src, dst):
     """
     重命名一个文件, 对文件夹重命名会出错
     """
-    pass
+    if is_file(src):
+        rename(src,dst)
 
-def rename_dir():
+def rename_dir(src,dst):
     """
     重命名一个目录, 对非目录重命名会报错
 
     """
-    pass
+    if is_dir(src):
+        rename(src,dst)
+
