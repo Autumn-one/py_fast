@@ -6,6 +6,7 @@ import shutil  # 导入文件的高级操作部分
 import json
 import ast
 import clipx
+from pprint import pformat
 
 
 def get_dirs(path_str=None, nopath=False):
@@ -81,8 +82,33 @@ def get_all(path_str=None, classify=False, nopath=False):
 
 
 # 创建一个目录
-new_dir = os.mkdir
-# new_dirs = os.makedirs 应该让 new_dir 直接支持递归创建,通过一个参数可以关闭递归创建 news new_dirs 等都应该是能够一次创建多个文件的方法
+def new_dir(path_str, walk=True, mode=511):
+    """
+    创建一个文件夹, 支持递归创建
+    path_str 是一个文件夹得路径, 默认会递归创建所有中间文件夹
+    walk 是否递归创建中间文件夹, 默认 True
+    """
+    if walk:
+        os.makedirs(path_str,mode=mode)
+    else:
+        os.mkdir(path_str,mode=mode)
+
+def new_dirs(*args,walk=True):
+    """
+    创建多个文件夹
+    可以这样写
+    new_dirs("目录一","目录二","目录三")
+    也可以这样写
+    new_dirs(["目录一","目录二","目录三"])
+    """
+    if len(args) == 1:
+        for i in args[0]:
+            new_dir(i,walk=walk)
+    else:
+        for i in args:
+            new_dir(i,walk=walk)
+
+
 """
 os.makedirs(name, mode=511, exist_ok=False)
 递归目录创建函数。与 mkdir() 类似，但会自动创建到达最后一级目录所需要的中间目录。
@@ -91,17 +117,36 @@ mode 参数会传递给 mkdir()，用来创建最后一级目录，对于该参�
 """
 
 
-def new_file(file_name, content=None, encoding="utf8"):
+def new_file(path_str, content=None, encoding="utf8",* ,walk=True):
     """
     创建一个文件
     file_name 文件名称或者一个文件路径
     content是一个可选的要假如文件的字符串内容
     encoding是文字编码
+    walk 是否递归创建中间需要的所有目录
     """
-    if content:
-        Path(file_name).write_text(content, encoding=encoding)
+    base_path = path.basename(path_str)
+    if not is_exist(base_path) and walk:
+        new_dir(base_path)
     else:
-        Path(file_name).touch()
+        raise Exception(f"中间路径不存在!{base_path}")
+
+    if content:
+        Path(path_str).write_text(content, encoding=encoding)
+    else:
+        Path(path_str).touch()
+
+def new_files(*args):
+    """
+    创建多个文件, 可以直接写文件夹创建多个空的文件, 或者创建得时候指定初始内容
+    new_files("1.txt","2.txt","3.txt")
+    new_files(("1.txt","内容1"),("2.txt","内容2"),("3.txt","内容3"))
+    """
+    for i in args:
+        if type(i) == list or type(i) == tuple:
+            new_file(i[0],i[1])
+        else:
+            new_file(i[0])
 
 
 # 创建目录或者文件, 带后缀就是文件不带后缀就是目录
@@ -110,6 +155,21 @@ def new(name: str, content: str = None):
         new_file(name, content)
     else:
         new_dir(name)
+
+def news(*args):
+    """
+    创建多个文件或者目录
+    news("1.txt","2.txt")
+    news("abc",("1.txt","内容"),"2.txt")
+    """
+    for i in args:
+        if type(i) == list or type(i) == tuple:
+            new_file(i[0],i[1])
+        elif "." in i:
+            new_file(i)
+        else:
+            new_dir(i)
+
 
 
 def remove(file_dir):
@@ -123,7 +183,7 @@ def remove(file_dir):
         shutil.rmtree(file_dir)
 
 
-# 删除文件
+# 删除文件 只能删除文件 删除目录直接报错
 remove_file = os.remove
 
 # 删除文件夹
@@ -134,7 +194,7 @@ stat = os.stat
 
 def read(file_name, encoding="utf8"):
     """
-    读取文件内容
+    读取文件内容, 只能读文本, 不能读二进制
     """
     with open(file_name, encoding=encoding) as f:
         return f.read()
@@ -177,8 +237,7 @@ def obj2str(obj):
     """
     py对象转换成字符串
     """
-    return json.dumps(obj, check_circular=False)
-
+    return pformat(obj)
 
 def copy(src=None, dst=None, *, follow_symlinks=True, ignore=None, glob=None):
     """
@@ -230,3 +289,23 @@ def cmd(cmd_str):
     该方法接受一个cmd命令字符串, 执行这条命令
     """
     return os.popen(cmd_str, mode="r", buffering=-1)
+
+
+def rename():
+    """
+    重命名一个文件或者文件夹
+    """
+    pass
+
+def rename_file():
+    """
+    重命名一个文件, 对文件夹重命名会出错
+    """
+    pass
+
+def rename_dir():
+    """
+    重命名一个目录, 对非目录重命名会报错
+
+    """
+    pass
