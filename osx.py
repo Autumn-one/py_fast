@@ -5,6 +5,7 @@ from walkx import *  # 导入所有的递归访问文件夹的方法
 import shutil  # 导入文件的高级操作部分
 import json
 import ast
+import clipx
 
 
 def get_dirs(path_str=None, nopath=False):

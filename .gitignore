@@ -4,6 +4,9 @@
 test*
 demo*
 
+# 用于忽略虚拟环境
+xuni*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
