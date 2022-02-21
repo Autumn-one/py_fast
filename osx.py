@@ -307,6 +307,8 @@ def rename_file(src, name):
     """
     if is_file(src):
         rename(src,name)
+    else:
+        raise Exception(f"{src}不是一个文件或者不存在")
 
 def rename_dir(src,name):
     """
@@ -314,5 +316,7 @@ def rename_dir(src,name):
 
     """
     if is_dir(src):
-        rename(src,dst)
+        rename(src,name)
+    else:
+        raise Exception(f"{src}不是一个文件或者不存在")
 
