@@ -62,7 +62,7 @@ def copy(copy_type = "", copy_res = None):
         "file", # 文件或者文件夹也可以是多个我恩件或者文件夹, 用一个序列装一下就好了
     }
 
-    if type(copy_type) == str and not copy_res: # 如果只传入了一个字符串, 没有传入第二个参数就直接复制字符串到剪切板
+    if type(copy_type) == str and copy_res == None: # 如果只传入了一个字符串, 没有传入第二个参数就直接复制字符串到剪切板
         copy_text = copy_type
         clip.copy(copy_text)
         return None
