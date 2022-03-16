@@ -2,12 +2,12 @@ from os import walk, listdir, path
 from pathlib import Path
 from pathx import *  # 导入所有的路径增强函数
 from walkx import *  # 导入所有的递归访问文件夹的方法
-from copy_var import * # 用于拷贝变量的 导出 copy_var deep_copy_var
 import shutil  # 导入文件的高级操作部分
 import json
 import ast
 import clipx
 from pprint import pformat
+import copy as cp
 
 
 def get_dirs(path_str=None, nopath=False):
@@ -242,13 +242,17 @@ def obj2str(obj):
 
 def copy(src=None, dst=None, *, follow_symlinks=True, ignore=None, glob=None):
     """
-    用于复制文件或者文件夹的函数, 将src拷贝到dst
+    用于复制变量,文件或者文件夹的函数, 将src拷贝到dst
+    如果只传入了一个参数就是浅复制变量
     src 是一个文件或者目录, 路径字符串或者路径对象都行
     dst 是一个文件或目录,如果是文件就是拷贝到指定的文件路径如果是目录且src不是目录就是拷贝到目录下面,如果是目录且src也是目录就是复制到路径
     follow_symlinks 和 shutil.copy 的同名参数一致的意思
     ignore 表示一个 glob 风格的忽略那些文件和目录, 注意这个参数可以提供一个或者多个,一个可以直接给出字符串, 多个用字符串元祖即可
     glob 只在 src 是目录而时候有用, 表示通过通配符匹配来复制所有匹配到的文件到指定目录, 和ignore参数互斥
     """
+    if not src is None and dst is None:
+        return cp.copy(src)
+
     if not src:
         src = cwd()
 
@@ -275,6 +279,8 @@ def copy(src=None, dst=None, *, follow_symlinks=True, ignore=None, glob=None):
 
 
 copy2 = shutil.copy2
+
+deep_copy = cp.deepcopy # 深度复制变量
 
 copy_file = shutil.copy
 copy_dir = shutil.copytree
