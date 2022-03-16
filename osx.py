@@ -2,6 +2,7 @@ from os import walk, listdir, path
 from pathlib import Path
 from pathx import *  # 导入所有的路径增强函数
 from walkx import *  # 导入所有的递归访问文件夹的方法
+from copy_var import * # 用于拷贝变量的 导出 copy_var deep_copy_var
 import shutil  # 导入文件的高级操作部分
 import json
 import ast
