@@ -127,10 +127,10 @@ def new_file(path_str, content=None, encoding="utf8",* ,walk=True):
     walk 是否递归创建中间需要的所有目录
     """
     base_path = dirname(path_str)
+    print(base_path)
+    print(is_exist(base_path))
     if not is_exist(base_path) and walk:
         new_dir(base_path)
-    else:
-        raise Exception(f"中间路径不存在!{base_path}")
 
     if content:
         Path(path_str).write_text(content, encoding=encoding)
@@ -153,7 +153,10 @@ def new_files(*args):
 # 创建目录或者文件, 带后缀就是文件不带后缀就是目录
 def new(name: str, content: str = None):
     if "." in name or content:  # 如果存在第二个 content 参数或者名字带点都认为是一个文件
+        if not is_abs(name):
+            name = str(Path(cwd()) / name)
         new_file(name, content)
+
     else:
         new_dir(name)
 
