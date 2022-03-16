@@ -65,7 +65,7 @@ def get_all(path_str=None, classify=False, nopath=False):
     files = []
     dirs = []
 
-    if not path_str:
+    if path_str is None:
         path_str = cwd()
 
     for item in listdir(path_str):
@@ -173,11 +173,19 @@ def news(*args):
 
 
 
-def remove(file_dir):
+def remove(file_dir=None,glob=None):
     """
     删除文件或者文件夹
     file_dir 文件或目录名称或路径
     """
+    if file_dir is None and not glob is None:
+        for p in walk_all(glob=glob):
+            if is_file(p):
+                os.remove(p)
+            else:
+                shutil.rmtree(p)
+        return
+
     if is_file(file_dir):
         os.remove(file_dir)
     else:

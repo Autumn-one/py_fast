@@ -73,7 +73,7 @@ def walk_all(path_str=None, *, classify=False, nopath=False, followlinks=False, 
     返回路径 path_str 下的所有后代文件和文件夹
     classify 参数表示是否对文件和文件夹分类,如果为True则返回两个列表,一个是文件列表一个是文件夹列表,如果是False那么返回一个列表包含文件和文件夹
     """
-    if not path_str:
+    if path_str is None:
         path_str = cwd()
 
     files = []  # 专门装文件的
