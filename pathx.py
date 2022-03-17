@@ -21,7 +21,6 @@ def cwd(path_str=None):
 def dirname(path_str):
     """
     传入一个路径返回这个目标路径的上一个文件夹路径
-
     """
     # 判断路径是否是以 / 或者 \ 结尾的如果是去掉在返回 path.dirname 的处理结果
 

@@ -83,18 +83,18 @@ def get_all(path_str=None, classify=False, nopath=False):
 
 
 # 创建一个目录
-def new_dir(path_str, walk=True, mode=511):
+def new_dir(path_str, recur=True, mode=511):
     """
     创建一个文件夹, 支持递归创建
     path_str 是一个文件夹得路径, 默认会递归创建所有中间文件夹
-    walk 是否递归创建中间文件夹, 默认 True
+    recur 是否递归创建中间文件夹, 默认 True
     """
-    if walk:
+    if recur:
         os.makedirs(path_str,mode=mode)
     else:
         os.mkdir(path_str,mode=mode)
 
-def new_dirs(*args,walk=True):
+def new_dirs(*args,recur=True):
     """
     创建多个文件夹
     可以这样写
@@ -104,10 +104,10 @@ def new_dirs(*args,walk=True):
     """
     if len(args) == 1:
         for i in args[0]:
-            new_dir(i,walk=walk)
+            new_dir(i,recur=recur)
     else:
         for i in args:
-            new_dir(i,walk=walk)
+            new_dir(i,recur=recur)
 
 
 """
@@ -118,18 +118,18 @@ mode 参数会传递给 mkdir()，用来创建最后一级目录，对于该参�
 """
 
 
-def new_file(path_str, content=None, encoding="utf8",* ,walk=True):
+def new_file(path_str, content=None, encoding="utf8",* ,recur=True):
     """
     创建一个文件
     file_name 文件名称或者一个文件路径
     content是一个可选的要假如文件的字符串内容
     encoding是文字编码
-    walk 是否递归创建中间需要的所有目录
+    recur 是否递归创建中间需要的所有目录
     """
     base_path = dirname(path_str)
     print(base_path)
     print(is_exist(base_path))
-    if not is_exist(base_path) and walk:
+    if not is_exist(base_path) and recur:
         new_dir(base_path)
 
     if content:
