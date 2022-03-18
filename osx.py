@@ -90,11 +90,12 @@ def new_dir(path_str, recur=True, mode=511):
     recur 是否递归创建中间文件夹, 默认 True
     """
     if recur:
-        os.makedirs(path_str,mode=mode)
+        os.makedirs(path_str, mode=mode)
     else:
-        os.mkdir(path_str,mode=mode)
+        os.mkdir(path_str, mode=mode)
 
-def new_dirs(*args,recur=True):
+
+def new_dirs(*args, recur=True):
     """
     创建多个文件夹
     可以这样写
@@ -104,10 +105,10 @@ def new_dirs(*args,recur=True):
     """
     if len(args) == 1:
         for i in args[0]:
-            new_dir(i,recur=recur)
+            new_dir(i, recur=recur)
     else:
         for i in args:
-            new_dir(i,recur=recur)
+            new_dir(i, recur=recur)
 
 
 """
@@ -118,7 +119,7 @@ mode 参数会传递给 mkdir()，用来创建最后一级目录，对于该参�
 """
 
 
-def new_file(path_str, content=None, encoding="utf8",* ,recur=True):
+def new_file(path_str, content=None, encoding="utf8", *, recur=True):
     """
     创建一个文件
     file_name 文件名称或者一个文件路径
@@ -137,6 +138,7 @@ def new_file(path_str, content=None, encoding="utf8",* ,recur=True):
     else:
         Path(path_str).touch()
 
+
 def new_files(*args):
     """
     创建多个文件, 可以直接写文件夹创建多个空的文件, 或者创建得时候指定初始内容
@@ -145,7 +147,7 @@ def new_files(*args):
     """
     for i in args:
         if type(i) == list or type(i) == tuple:
-            new_file(i[0],i[1])
+            new_file(i[0], i[1])
         else:
             new_file(i[0])
 
@@ -160,6 +162,7 @@ def new(name: str, content: str = None):
     else:
         new_dir(name)
 
+
 def news(*args):
     """
     创建多个文件或者目录
@@ -168,15 +171,14 @@ def news(*args):
     """
     for i in args:
         if type(i) == list or type(i) == tuple:
-            new_file(i[0],i[1])
+            new_file(i[0], i[1])
         elif "." in i:
             new_file(i)
         else:
             new_dir(i)
 
 
-
-def remove(file_dir=None,glob=None):
+def remove(file_dir=None, glob=None):
     """
     删除文件或者文件夹
     file_dir 文件或目录名称或路径
@@ -251,6 +253,7 @@ def obj2str(obj):
     """
     return pformat(obj)
 
+
 def copy(src=None, dst=None, *, follow_symlinks=True, ignore=None, glob=None):
     """
     用于复制变量,文件或者文件夹的函数, 将src拷贝到dst
@@ -264,10 +267,14 @@ def copy(src=None, dst=None, *, follow_symlinks=True, ignore=None, glob=None):
     if not src is None and dst is None:
         return cp.copy(src)
 
-    if not src:
+    if src is None or src == '.':
+        # 如果 src 是None 或者 src是.
         src = cwd()
 
-    if is_file(src): # 如果复制文件, 查看dst 目标路径中是否有不存在的目录,有就创建好在复制
+    if not is_abs(dst):
+        dst = str(Path(cwd()) / dst)
+
+    if is_file(src):  # 如果复制文件, 查看dst 目标路径中是否有不存在的目录,有就创建好在复制
         base_path = dirname(dst)
         if not is_exist(base_path):
             new_dir(base_path)
@@ -291,7 +298,7 @@ def copy(src=None, dst=None, *, follow_symlinks=True, ignore=None, glob=None):
 
 copy2 = shutil.copy2
 
-deep_copy = cp.deepcopy # 深度复制变量
+deep_copy = cp.deepcopy  # 深度复制变量
 
 copy_file = shutil.copy
 copy_dir = shutil.copytree
@@ -317,24 +324,25 @@ def rename(src, name):
     name 只能是一个文件名或者一个目录名
     """
     dir_path = dirname(src)
-    os.rename(src,Path(dir_path) / name)
+    os.rename(src, Path(dir_path) / name)
+
 
 def rename_file(src, name):
     """
     重命名一个文件, 对文件夹重命名会出错
     """
     if is_file(src):
-        rename(src,name)
+        rename(src, name)
     else:
         raise Exception(f"{src}不是一个文件或者不存在")
 
-def rename_dir(src,name):
+
+def rename_dir(src, name):
     """
     重命名一个目录, 对非目录重命名会报错
 
     """
     if is_dir(src):
-        rename(src,name)
+        rename(src, name)
     else:
         raise Exception(f"{src}不是一个文件或者不存在")
-
