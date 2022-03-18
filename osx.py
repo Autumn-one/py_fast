@@ -155,7 +155,7 @@ def new_files(*args):
 # 创建目录或者文件, 带后缀就是文件不带后缀就是目录
 def new(name: str, content: str = None):
     if "." in name or content:  # 如果存在第二个 content 参数或者名字带点都认为是一个文件
-        if not is_abs(name):
+        if is_rel(name):
             name = str(Path(cwd()) / name)
         new_file(name, content)
 
@@ -271,7 +271,7 @@ def copy(src=None, dst=None, *, follow_symlinks=True, ignore=None, glob=None):
         # 如果 src 是None 或者 src是.
         src = cwd()
 
-    if not is_abs(dst):
+    if is_rel(dst):
         dst = str(Path(cwd()) / dst)
 
     if is_file(src):  # 如果复制文件, 查看dst 目标路径中是否有不存在的目录,有就创建好在复制
