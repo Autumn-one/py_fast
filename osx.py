@@ -158,7 +158,6 @@ def new(name: str, content: str = None):
         if is_rel(name):
             name = str(Path(cwd()) / name)
         new_file(name, content)
-
     else:
         new_dir(name)
 
