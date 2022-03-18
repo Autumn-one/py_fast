@@ -8,9 +8,12 @@ is_dir = path.isdir # 判断是否是文件夹
 is_link = is_symlink = path.islink # 重命名判断软链接的方法
 is_exist = path.exists # 判断路径是否存在
 
-def is_relate():
-    """判断路径是否是相对路径"""
-    pass
+def is_rel(p):
+    """
+    判断路径是否是相对路径
+    p 参数是一个 路径字符串或者 Path 对象
+    """
+    return not is_abs(p)
 
 def cwd(path_str=None):
     """
@@ -23,7 +26,6 @@ def cwd(path_str=None):
         if is_abs(path_str):
             path_str = Path(cwd()) / path_str
         return os.chdir(path_str)
-
 
 
 def dirname(path_str):
