@@ -205,11 +205,11 @@ remove_dir = shutil.rmtree
 stat = os.stat
 
 
-def read(file_name, encoding="utf8"):
+def read(file_name, encoding="utf8", newline=None):
     """
     读取文件内容, 只能读文本, 不能读二进制
     """
-    with open(file_name, encoding=encoding) as f:
+    with open(file_name, encoding=encoding, newline = newline) as f:
         return f.read()
 
 
