@@ -127,9 +127,10 @@ def new_file(path_str, content=None, encoding="utf8", *, recur=True):
     encoding是文字编码
     recur 是否递归创建中间需要的所有目录
     """
+    if is_rel(path_str):
+        path_str = Path(cwd()) / path_str
+
     base_path = dirname(path_str)
-    print(base_path)
-    print(is_exist(base_path))
     if not is_exist(base_path) and recur:
         new_dir(base_path)
 
