@@ -59,11 +59,16 @@ def to_abs(path_arg):
     """
     传入一个路径字符串或者一个Path将一个路径转换成绝对路径, 返回路径字符串
     """
+    if is_abs(path_arg):
+        return path_arg
+
     path_str = ""
     if isinstance(path_arg, Path):
         path_str = str(path_arg)
     else:
         path_str = path_arg
+
+    path_str = str(Path(cwd()) / path_str)
 
     path_list = re.split(r"[\\/]",path_str)
     path_list = [get_env(i) if i.startswith("%") and i.endswith("%") else i

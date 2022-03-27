@@ -128,10 +128,10 @@ def new_file(path_str, content=None, encoding="utf8", *, recur=True):
     encoding是文字编码
     recur 是否递归创建中间需要的所有目录
     """
-    if is_rel(path_str):
-        path_str = to_abs(path_str)
+    path_str = to_abs(path_str)
 
     base_path = dirname(path_str)
+
     if no_exist(base_path) and recur:
         new_dir(base_path)
 
@@ -270,8 +270,7 @@ def copy(src=None, dst=None, *, follow_symlinks=True, ignore=None, glob=None):
         # 如果 src 是None 或者 src是.
         src = cwd()
 
-    if is_rel(dst):
-        dst = str(Path(cwd()) / dst)
+    dst = to_abs(dst)
 
     if is_file(src):  # 如果复制文件, 查看dst 目标路径中是否有不存在的目录,有就创建好在复制
         base_path = dirname(dst)
