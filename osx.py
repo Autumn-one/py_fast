@@ -128,7 +128,7 @@ def new_file(path_str, content=None, encoding="utf8", *, recur=True):
     recur 是否递归创建中间需要的所有目录
     """
     if is_rel(path_str):
-        path_str = Path(cwd()) / path_str
+        path_str = str(Path(cwd()) / path_str)
 
     base_path = dirname(path_str)
     if not is_exist(base_path) and recur:
@@ -210,7 +210,7 @@ def read(file_name, encoding="utf8", newline=None):
     """
     读取文件内容, 只能读文本, 不能读二进制
     """
-    with open(file_name, encoding=encoding, newline = newline) as f:
+    with open(file_name, encoding=encoding, newline=newline) as f:
         return f.read()
 
 

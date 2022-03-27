@@ -1,6 +1,8 @@
 from os import path
 import os
 from pathlib import Path
+import re
+from sysx import *
 
 is_abs = path.isabs # 判断是否是绝对路径
 is_file = path.isfile # 判断是否是文件
@@ -23,7 +25,7 @@ def cwd(path_str=None):
     if path_str is None:
         return os.getcwd()
     else:
-        if is_abs(path_str):
+        if is_rel(path_str):
             path_str = Path(cwd()) / path_str
         return os.chdir(path_str)
 
@@ -46,4 +48,23 @@ def basename(path_str):
     if path_str.endswith(r"/") or path_str.endswith("\\"):
         path_str = path_str[0:len(path_str)-1]
     return path.basename(path_str)
+
+def to_abs(path_arg):
+    """
+    传入一个路径字符串或者一个Path将一个路径转换成绝对路径, 返回路径字符串
+    """
+    path_str = ""
+    if isinstance(path_arg, Path):
+        path_str = str(path_arg)
+    else:
+        path_str = path_arg
+
+    path_list = re.split(r"[\\/]",path_str)
+    path_list = [get_env(i) if i.startswith("%") and i.endswith("%") else i
+                 for i in path_list]
+
+    path_str = str(Path("/".join(path_list)))
+    return path_str
+
+
 
