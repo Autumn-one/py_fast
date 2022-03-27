@@ -10,6 +10,12 @@ is_dir = path.isdir # 判断是否是文件夹
 is_link = is_symlink = path.islink # 重命名判断软链接的方法
 is_exist = path.exists # 判断路径是否存在
 
+def no_exist(*args, **kwargs):
+    """
+    判断路径是否不存在
+    """
+    return not is_exist(*args, **kwargs)
+
 def is_rel(p):
     """
     判断路径是否是相对路径

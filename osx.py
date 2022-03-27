@@ -8,6 +8,7 @@ import ast
 import clipx
 from pprint import pformat
 import copy as cp
+from easyx import *
 
 
 def get_dirs(path_str=None, nopath=False):
@@ -128,10 +129,10 @@ def new_file(path_str, content=None, encoding="utf8", *, recur=True):
     recur 是否递归创建中间需要的所有目录
     """
     if is_rel(path_str):
-        path_str = str(Path(cwd()) / path_str)
+        path_str = to_abs(path_str)
 
     base_path = dirname(path_str)
-    if not is_exist(base_path) and recur:
+    if no_exist(base_path) and recur:
         new_dir(base_path)
 
     if content:
@@ -155,9 +156,7 @@ def new_files(*args):
 
 # 创建目录或者文件, 带后缀就是文件不带后缀就是目录
 def new(name: str, content: str = None):
-    if "." in name or content:  # 如果存在第二个 content 参数或者名字带点都认为是一个文件
-        if is_rel(name):
-            name = str(Path(cwd()) / name)
+    if is_in(".", name) and no_in("/",name) and no_in("\\",name) or content:  # 如果存在第二个 content 参数或者名字带点都认为是一个文件
         new_file(name, content)
     else:
         new_dir(name)
