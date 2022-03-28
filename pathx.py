@@ -62,13 +62,7 @@ def to_abs(path_arg):
     if is_abs(path_arg):
         return path_arg
 
-    path_str = ""
-    if isinstance(path_arg, Path):
-        path_str = str(path_arg)
-    else:
-        path_str = path_arg
-
-    path_str = str(Path(cwd()) / path_str)
+    path_str = str(Path(cwd()) / path_arg)
 
     path_list = re.split(r"[\\/]",path_str)
     path_list = [get_env(i) if i.startswith("%") and i.endswith("%") else i

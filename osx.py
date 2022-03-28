@@ -90,6 +90,7 @@ def new_dir(path_str, recur=True, mode=511):
     path_str 是一个文件夹得路径, 默认会递归创建所有中间文件夹
     recur 是否递归创建中间文件夹, 默认 True
     """
+    path_str = to_abs(path_str)
     if recur:
         os.makedirs(path_str, mode=mode)
     else:
@@ -148,15 +149,19 @@ def new_files(*args):
     new_files(("1.txt","内容1"),("2.txt","内容2"),("3.txt","内容3"))
     """
     for i in args:
-        if type(i) == list or type(i) == tuple:
+        if isinstance(i, list) or isinstance(i, tuple):
             new_file(i[0], i[1])
         else:
             new_file(i[0])
 
 
-# 创建目录或者文件, 带后缀就是文件不带后缀就是目录
 def new(name: str, content: str = None):
-    if is_in(".", name) and no_in("/",name) and no_in("\\",name) or content:  # 如果存在第二个 content 参数或者名字带点都认为是一个文件
+    """
+    创建目录或者文件, 默认带后缀就是文件不带后缀就是目录
+    name是文件或者目录名字
+    content是内容
+    """
+    if is_in(".", basename(name)) or content:  # 如果存在第二个 content 参数或者名字带点都认为是一个文件
         new_file(name, content)
     else:
         new_dir(name)
