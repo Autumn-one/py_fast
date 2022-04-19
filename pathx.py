@@ -10,6 +10,21 @@ is_dir = path.isdir # 判断是否是文件夹
 is_link = is_symlink = path.islink # 重命名判断软链接的方法
 is_exist = path.exists # 判断路径是否存在
 
+__all__ = (
+    "is_abs",
+    "is_file",
+    "is_dir",
+    "is_link",
+    "is_exist",
+    "no_exist",
+    "is_rel",
+    "cwd",
+    "dirname",
+    "basename",
+    "to_abs",
+    "is_symlink"
+)
+
 def no_exist(*args, **kwargs):
     """
     判断路径是否不存在
