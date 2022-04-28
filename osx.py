@@ -9,6 +9,7 @@ import clipx
 from pprint import pformat
 import copy as cp
 from easyx import *
+import os
 
 
 def get_dirs(path_str=None, nopath=False):
