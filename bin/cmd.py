@@ -7,7 +7,7 @@ osx = importlib.import_module("osx")
 
 args = sys.argv
 
-fn_str = args[1]
+fn_str = args[1].replace("-","_")
 fn_args = args[2:]
 
 

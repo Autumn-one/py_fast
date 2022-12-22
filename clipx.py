@@ -3,7 +3,7 @@
 import pyperclip as clip
 import win32clipboard
 from ctypes import *
-from pathx import *
+from os import path
 
 
 class DROPFILES(Structure):
@@ -40,7 +40,6 @@ def setClipboardFile(file):
 
 def readClipboardFilePaths():
     win32clipboard.OpenClipboard()
-    # paths = None
     try:
         return win32clipboard.GetClipboardData(win32clipboard.CF_HDROP)
     finally:
@@ -70,21 +69,21 @@ def copy(copy_type = "", copy_res = None):
     if copy_type in type_set and copy_res:
         if copy_type == "text":
             copy_text = copy_type
-            clip.copy(copy_text)
+            clip.copy(copy_res)
         elif type(copy_res) == str: # 如果是单个文本说明是一个url
-            if not is_exist(copy_res):
+            if not path.exists(copy_res):
                 raise Exception(f"路径:{copy_res} 不存在")
             else:
                 setClipboardFile(copy_res)
         else: # 如果不是一个字符串说明是多个文件
             for p in copy_res:
-                if not is_exist(p):
+                if not path.exists(p):
                     raise Exception(f"路径:{copy_res} 不存在")
             setClipboardFiles(copy_res)
 
         return None
 
-    raise Exception(f"参数错误!")
+    raise Exception(f"参数错误!,copy_type={copy_type},copy_res={copy_res},copy_res_type={type(copy_res)}")
 
 
 def paste():
@@ -92,16 +91,23 @@ def paste():
     返回两个值, 第一个为值的类型,只有三种可能一个是 text 或者 file None表示没有东西
     第二个值表示实际的结果;,如果是简单的文本就是一个字符串;,如果是一个非简单文本将会是一个元组,表示所有的文件路径,哪怕只有一个文件也是一个元组
     """
-    clip_con = clip.paste()
+    type = None
+    clip_con = None
 
-    if clip_con:
-        return "text", clip_con
-    else:
-        try:
-            clip_con = readClipboardFilePaths()
-            return "file", clip_con
-        except Exception as e:
-            return None, e
+    try:
+        clip_con = readClipboardFilePaths()
+        type = 'file'
+    except Exception as e:
+        type = None
+        clip_con = e
+
+    if type == None:
+        cp = clip.paste()
+        if cp:
+            type = 'text'
+            clip_con = cp
+
+    return type, clip_con
 
 
 
