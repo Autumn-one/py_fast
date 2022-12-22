@@ -5,6 +5,13 @@ import win32clipboard
 from ctypes import *
 from os import path
 
+__all__ = (
+    "copy",
+    "paste",
+    "wait_for_paste",
+    "wait_for_new_paste"
+)
+
 
 class DROPFILES(Structure):
     _fields_ = [
@@ -109,6 +116,14 @@ def paste():
 
     return type, clip_con
 
+
+def wait_for_paste(timeout = None):
+    """等待剪切板出现非空的内容，timeout为超时时间"""
+    pass
+
+def wait_for_new_paste(timeout = None):
+    """等待剪切板出现新的内容"""
+    pass
 
 
 
