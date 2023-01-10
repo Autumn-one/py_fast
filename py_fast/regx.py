@@ -67,9 +67,46 @@ root_key_map = MappingProxyType({
 
 def get_list(key = None):
     """
-    获得对应key下面的value
+    获得对应key下面的所有项和值，返回一个列表，列表项形如：
+    {
+        type: "item",
+        value: "abc"
+    }
+    或
+    {
+        type: "value",
+        value: "abc",
+        value_type: winreg.REG_BINARY
+    }
     """
-    ...
+    root_key, child_key = split_reg_str(key)
+    if not root_key: return None
+
+    key_list = []
+
+    if child_key:
+        with winreg.OpenKey(root_key, child_key) as key:
+            count = 0
+            while True:
+                try:
+                    k = winreg.EnumKey(key,count)
+                    key_list.append(k)
+                except OSError:
+                    break
+                count += 1
+        return key_list
+    else:
+        count = 0
+        while True:
+            try:
+                k = winreg.EnumKey(root_key,count)
+                key_list.append(k)
+            except OSError:
+                break
+
+        return key_list
+
+
 
 
 def transform_root_key(key: str) -> Optional[int]:
