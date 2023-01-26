@@ -134,7 +134,7 @@ def new_file(path_str, content=None, encoding="utf8", *, recur=True):
 
     base_path = dirname(path_str)
 
-    if no_exist(base_path) and recur:
+    if not_exist(base_path) and recur:
         new_dir(base_path)
 
     if content:

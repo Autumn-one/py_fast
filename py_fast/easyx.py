@@ -5,7 +5,7 @@ def is_none(arg):
     return arg is None
 
 
-def no_none(arg):
+def not_none(arg):
     """
     传入一个参数判断是否不为None
     """
@@ -25,7 +25,7 @@ def is_in(a, b, join="or"):
         return a in b
 
 
-def no_in(*args, **kwargs):
+def not_in(*args, **kwargs):
     """
     传入a和b参数判断 a 是否不在 b 中
     """

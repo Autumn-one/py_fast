@@ -70,7 +70,8 @@ def get_list(key = None):
     获得对应key下面的所有项和值，返回一个列表，列表项形如：
     {
         type: "item",
-        value: "abc"
+        key: "abc"
+        value: None
     }
     或
     {
@@ -84,25 +85,65 @@ def get_list(key = None):
 
     key_list = []
 
+    count = 0
     if child_key:
         with winreg.OpenKey(root_key, child_key) as key:
-            count = 0
-            while True:
-                try:
+            try:
+                while True:
                     k = winreg.EnumKey(key,count)
-                    key_list.append(k)
-                except OSError:
-                    break
-                count += 1
+                    key_list.append({
+                        'type': 'item',
+                        'key': k,
+                        'value': None
+                    })
+                    count += 1
+            except OSError:...
+            finally:
+                count = 0
+
+            try:
+                while True:
+                    key_name, value, value_type = winreg.EnumValue(key, count)
+                    key_list.append({
+                        'type': 'value',
+                        'key': key_name,
+                        'value': value,
+                        'value_type': value_type
+                    })
+                    count += 1
+            except OSError:...
+            finally:
+                del count
+
         return key_list
     else:
-        count = 0
-        while True:
-            try:
+        # 遍历所有的注册表项
+        try:
+            while True:
                 k = winreg.EnumKey(root_key,count)
-                key_list.append(k)
-            except OSError:
-                break
+                key_list.append({
+                    'type': 'item',
+                    'key': k,
+                    'value': None
+                })
+                count += 1
+        except OSError: ...
+        finally:
+            count = 0
+        # 遍历所有的注册表值
+        try:
+            while True:
+                key_name, value, value_type = winreg.EnumValue(root_key, count)
+                key_list.append({
+                    'type': 'value',
+                    'key': key_name,
+                    'value': value,
+                    'value_type': value_type
+                })
+                count += 1
+        except OSError:...
+        finally:
+            del count
 
         return key_list
 

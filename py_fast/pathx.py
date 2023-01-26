@@ -16,7 +16,7 @@ __all__ = (
     "is_dir",
     "is_link",
     "is_exist",
-    "no_exist",
+    "not_exist",
     "is_rel",
     "cwd",
     "dirname",
@@ -25,7 +25,7 @@ __all__ = (
     "is_symlink"
 )
 
-def no_exist(*args, **kwargs):
+def not_exist(*args, **kwargs):
     """
     判断路径是否不存在
     """
