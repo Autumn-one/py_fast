@@ -1,9 +1,10 @@
 """
 用于操作注册表的方法
 """
-from typing import Tuple, Union, Optional
-from types import MappingProxyType
 import winreg
+from types import MappingProxyType
+from typing import Tuple, Optional, Any, Union
+from winreg import HKEYType
 
 __all__ = (
     # 注册表根键导出
@@ -40,32 +41,32 @@ HKEY_DYN_DATA = HKDD = winreg.HKEY_DYN_DATA
 # 属于该注册表键的表项可用于读取性能数据。这些数据其实并不存放于注册表中；注册表提供功能让系统收集数据。
 HKEY_PERFORMANCE_DATA = HKPD = winreg.HKEY_PERFORMANCE_DATA
 
-
 # 注册表所有的根键映射, 这是一个只读的map
 root_key_map = MappingProxyType({
-    "HKEY_CLASSES_ROOT": HKEY_CLASSES_ROOT,
-    "HKCR": HKCR,
+    "HKEY_CLASSES_ROOT"    : HKEY_CLASSES_ROOT,
+    "HKCR"                 : HKCR,
 
-    "HKEY_CURRENT_USER": HKEY_CURRENT_USER,
-    "HKCU": HKCU,
+    "HKEY_CURRENT_USER"    : HKEY_CURRENT_USER,
+    "HKCU"                 : HKCU,
 
-    "HKEY_CURRENT_CONFIG": HKEY_CURRENT_CONFIG,
-    "HKCC": HKCC,
+    "HKEY_CURRENT_CONFIG"  : HKEY_CURRENT_CONFIG,
+    "HKCC"                 : HKCC,
 
-    "HKEY_LOCAL_MACHINE": HKEY_LOCAL_MACHINE,
-    "HKLM": HKLM,
+    "HKEY_LOCAL_MACHINE"   : HKEY_LOCAL_MACHINE,
+    "HKLM"                 : HKLM,
 
-    "HKEY_USERS": HKEY_USERS,
-    "HKU": HKU,
+    "HKEY_USERS"           : HKEY_USERS,
+    "HKU"                  : HKU,
 
-    "HKEY_DYN_DATA": HKEY_DYN_DATA,
-    "HKDD": HKDD,
+    "HKEY_DYN_DATA"        : HKEY_DYN_DATA,
+    "HKDD"                 : HKDD,
 
     "HKEY_PERFORMANCE_DATA": HKEY_PERFORMANCE_DATA,
-    "HKPD": HKPD
+    "HKPD"                 : HKPD
 })
 
-def get_list(key = None):
+
+def get_list(key=None):
     """
     获得对应key下面的所有项和值，返回一个列表，列表项形如：
     {
@@ -75,7 +76,8 @@ def get_list(key = None):
     }
     或
     {
-        type: "value",
+        type: "value_item",
+        key: "ccc",
         value: "abc",
         value_type: winreg.REG_BINARY
     }
@@ -90,14 +92,15 @@ def get_list(key = None):
         with winreg.OpenKey(root_key, child_key) as key:
             try:
                 while True:
-                    k = winreg.EnumKey(key,count)
+                    k = winreg.EnumKey(key, count)
                     key_list.append({
-                        'type': 'item',
-                        'key': k,
+                        'type' : 'item',
+                        'key'  : k,
                         'value': None
                     })
                     count += 1
-            except OSError:...
+            except OSError:
+                ...
             finally:
                 count = 0
 
@@ -105,13 +108,14 @@ def get_list(key = None):
                 while True:
                     key_name, value, value_type = winreg.EnumValue(key, count)
                     key_list.append({
-                        'type': 'value',
-                        'key': key_name,
-                        'value': value,
+                        'type'      : 'value_item',
+                        'key'       : key_name,
+                        'value'     : value,
                         'value_type': value_type
                     })
                     count += 1
-            except OSError:...
+            except OSError:
+                ...
             finally:
                 del count
 
@@ -120,14 +124,15 @@ def get_list(key = None):
         # 遍历所有的注册表项
         try:
             while True:
-                k = winreg.EnumKey(root_key,count)
+                k = winreg.EnumKey(root_key, count)
                 key_list.append({
-                    'type': 'item',
-                    'key': k,
+                    'type' : 'item',
+                    'key'  : k,
                     'value': None
                 })
                 count += 1
-        except OSError: ...
+        except OSError:
+            ...
         finally:
             count = 0
         # 遍历所有的注册表值
@@ -135,23 +140,22 @@ def get_list(key = None):
             while True:
                 key_name, value, value_type = winreg.EnumValue(root_key, count)
                 key_list.append({
-                    'type': 'value',
-                    'key': key_name,
-                    'value': value,
+                    'type'      : 'value_item',
+                    'key'       : key_name,
+                    'value'     : value,
                     'value_type': value_type
                 })
                 count += 1
-        except OSError:...
+        except OSError:
+            ...
         finally:
             del count
 
         return key_list
 
 
-
-
 def transform_root_key(key: str) -> Optional[int]:
-    """根据传入的str转换根键"""
+    """根据传入的str转换为根键并返回，如果无法返回根键那么直接返回 None"""
     if key.strip() == "": return None
 
     if key in root_key_map:
@@ -159,7 +163,8 @@ def transform_root_key(key: str) -> Optional[int]:
     else:
         return None
 
-def split_reg_str(reg_str: str) -> Tuple[Optional[int],Optional[str]]:
+
+def split_reg_str(reg_str: str) -> Tuple[Optional[int], Optional[str]]:
     """用于切割注册表字符串，返回两个值，一个是注册表的根常量，一个是剩余的注册表路径"""
     if reg_str.strip() == "": return None, None
 
@@ -168,10 +173,80 @@ def split_reg_str(reg_str: str) -> Tuple[Optional[int],Optional[str]]:
     if root_key in root_key_map:
         # 说明有根键
         if len(path_arr) > 1:
-            return root_key_map[root_key], reg_str[len(root_key)+1:]
+            return root_key_map[root_key], reg_str[len(root_key) + 1:]
         else:
             return root_key_map[root_key], None
 
     else:
         # 没有根键
         return None, reg_str
+
+
+def get_handle(key_path: str):
+    """
+    接受一个键的路径返回打开的 handle
+    """
+    root_key, sub_key = split_reg_str(key_path)  # 获取根键和子键路径
+    if root_key:
+        if sub_key:
+            return winreg.OpenKeyEx(root_key, sub_key)
+        else:
+            return root_key
+    else:
+        return None
+
+
+def create(base_key: Union[HKEYType, str, int],
+           key: Union[str, int],
+           value: Optional[str] = None,
+           *,
+           type: str = "item",
+           value_type: Any = None):
+    """
+    创建注册表的项或值,如果只是创建项那么直接写入
+    base_key 在那个项的基础下创建
+    key 创建的键的名称
+    type 创建的是一个项还是一个值项
+    value 如果是值项，那么这个值项的 value 是什么
+    value_type 值项的值是多少
+    """
+    reg_handle = get_handle(base_key)
+    if type == "item":
+        winreg.CreateKeyEx(reg_handle, key)
+    else:
+        pass
+
+    winreg.CloseKey(reg_handle)
+
+
+create_key = create
+
+
+def create_item(): ...  # 创建注册表的项
+
+
+def create_value(): ...  # 专门创建注册表值的方法，无法用来创建项
+
+
+def delete(): ...  # 删除键
+
+
+remove = delete
+
+
+def delete_item(): ...
+
+
+def delete_value(): ...
+
+
+def raname(): ...  # 修改注册表项或值的名称
+
+
+def set_value(): ...  # 设置注册表值的信息
+
+
+def export_file(): ...  # 导出为注册表文件
+
+
+def load_file(): ...  # 加载注册表文件
