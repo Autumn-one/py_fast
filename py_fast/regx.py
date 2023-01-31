@@ -3,7 +3,7 @@
 """
 import winreg
 from types import MappingProxyType
-from typing import Tuple, Optional, Any, Union
+from typing import Tuple, Optional, Any, Union, Literal, TypeAlias
 from winreg import HKEYType
 
 __all__ = (
@@ -182,7 +182,7 @@ def split_reg_str(reg_str: str) -> Tuple[Optional[int], Optional[str]]:
         return None, reg_str
 
 
-def get_handle(key_path: str):
+def get_handle(key_path: str) -> Optional[HKEYType | int]:
     """
     接受一个键的路径返回打开的 handle
     """
@@ -195,13 +195,29 @@ def get_handle(key_path: str):
     else:
         return None
 
-
+# 注册表的值类型，参照链接： https://docs.python.org/zh-cn/3/library/winreg.html?highlight=winreg#value-types
+REG_VALUE_TYPE: TypeAlias = \
+    winreg.REG_BINARY \
+    | winreg.REG_DWORD \
+    | winreg.REG_DWORD_LITTLE_ENDIAN \
+    | winreg.REG_DWORD_BIG_ENDIAN \
+    | winreg.REG_EXPAND_SZ \
+    | winreg.REG_LINK \
+    | winreg.REG_MULTI_SZ \
+    | winreg.REG_NONE \
+    | winreg.REG_QWORD \
+    | winreg.REG_QWORD_LITTLE_ENDIAN \
+    | winreg.REG_RESOURCE_LIST \
+    | winreg.REG_FULL_RESOURCE_DESCRIPTOR \
+    | winreg.REG_RESOURCE_REQUIREMENTS_LIST \
+    | winreg.REG_SZ
 def create(base_key: Union[HKEYType, str, int],
            key: Union[str, int],
            value: Optional[str] = None,
            *,
-           type: str = "item",
-           value_type: Any = None):
+           type: Literal["item", "value_item"] = "item",
+           value_type: REG_VALUE_TYPE = winreg.REG_SZ) \
+    -> None:
     """
     创建注册表的项或值,如果只是创建项那么直接写入
     base_key 在那个项的基础下创建
@@ -211,10 +227,12 @@ def create(base_key: Union[HKEYType, str, int],
     value_type 值项的值是多少
     """
     reg_handle = get_handle(base_key)
+    if reg_handle is None: return
+
     if type == "item":
         winreg.CreateKeyEx(reg_handle, key)
     else:
-        pass
+        winreg.SetValueEx(reg_handle, key, 0, value_type, value)
 
     winreg.CloseKey(reg_handle)
 

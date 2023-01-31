@@ -6,6 +6,7 @@ demo*
 
 # 用于忽略虚拟环境
 xuni*
+.xuni
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
