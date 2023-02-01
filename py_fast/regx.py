@@ -3,7 +3,7 @@
 """
 import winreg
 from types import MappingProxyType
-from typing import Tuple, Optional, Any, Union, Literal, TypeAlias
+from typing import Tuple, Optional, Any, Union, Literal, TypeAlias, Type
 from winreg import HKEYType
 
 __all__ = (
@@ -89,7 +89,7 @@ def get_list(key=None):
 
     count = 0
     if child_key:
-        with winreg.OpenKey(root_key, child_key) as key:
+        with winreg.OpenKey(root_key, child_key, 0, winreg.KEY_ALL_ACCESS) as key:
             try:
                 while True:
                     k = winreg.EnumKey(key, count)
@@ -165,7 +165,7 @@ def transform_root_key(key: str) -> Optional[int]:
 
 
 def split_reg_str(reg_str: str) -> Tuple[Optional[int], Optional[str]]:
-    """用于切割注册表字符串，返回两个值，一个是注册表的根常量，一个是剩余的注册表路径"""
+    """用于切割注册表字符串，返回三个值，一个是注册表的根常量，一个是剩余的注册表路径"""
     if reg_str.strip() == "": return None, None
 
     path_arr = reg_str.split('\\')
@@ -182,52 +182,77 @@ def split_reg_str(reg_str: str) -> Tuple[Optional[int], Optional[str]]:
         return None, reg_str
 
 
-def get_handle(key_path: str) -> Optional[HKEYType | int]:
+def get_parent(reg_path: str, return_type: Literal["str", "handle"] = "str") -> Union[HKEYType, str, int, None]:
+    """传入一个注册表的键，这个可以是对象也可以是字符串，返回上一级的键
+    如果传入是handle 那么久返回handle，如果传入的是字符串那么返回字符串，具体返回什么可以通过第二个参数指定
+    """
+    if reg_path.strip() == "": return None
+
+    path_arr = reg_path.split("\\")
+    if len(path_arr) == 1:
+        if return_type == "str":
+            return path_arr[0]
+        else:
+            return root_key_map[path_arr[0]]
+
+    path_arr.pop()
+    parent_path = "\\".join(path_arr)
+
+    if return_type == "str":
+        return parent_path
+    else:
+        return get_handle(parent_path)
+
+
+def get_handle(key_path: str) -> Union[HKEYType, int, None]:
     """
     接受一个键的路径返回打开的 handle
     """
     root_key, sub_key = split_reg_str(key_path)  # 获取根键和子键路径
     if root_key:
         if sub_key:
-            return winreg.OpenKeyEx(root_key, sub_key)
+            return winreg.OpenKeyEx(root_key, sub_key, 0, winreg.KEY_ALL_ACCESS)
         else:
             return root_key
     else:
         return None
 
+
 # 注册表的值类型，参照链接： https://docs.python.org/zh-cn/3/library/winreg.html?highlight=winreg#value-types
-REG_VALUE_TYPE: TypeAlias = Union[
+REG_VALUE_TYPE: TypeAlias = Literal[
     # 任意格式的二进制数据。
     winreg.REG_BINARY,
-    # 32 位数字。
+        # 32 位数字。
     winreg.REG_DWORD,
-    # 32 位低字节序格式的数字。相当于 REG_DWORD。
+        # 32 位低字节序格式的数字。相当于 REG_DWORD。
     winreg.REG_DWORD_LITTLE_ENDIAN,
-    # 32 位高字节序格式的数字。
+        # 32 位高字节序格式的数字。
     winreg.REG_DWORD_BIG_ENDIAN,
-    # 包含环境变量（%PATH%）的字符串，以空字符结尾。
+        # 包含环境变量（%PATH%）的字符串，以空字符结尾。
     winreg.REG_EXPAND_SZ,
-    # Unicode 符号链接。
+        # Unicode 符号链接。
     winreg.REG_LINK,
-    # 一串以空字符结尾的字符串，最后以两个空字符结尾。Python 会自动处理这种结尾形式。
+        # 一串以空字符结尾的字符串，最后以两个空字符结尾。Python 会自动处理这种结尾形式。
     winreg.REG_MULTI_SZ,
-    # 未定义的类型。
+        # 未定义的类型。
     winreg.REG_NONE,
-    # 64 位数字。
+        # 64 位数字。
     winreg.REG_QWORD,
-    # 64 位低字节序格式的数字。相当于 REG_QWORD。
+        # 64 位低字节序格式的数字。相当于 REG_QWORD。
     winreg.REG_QWORD_LITTLE_ENDIAN,
-    # 设备驱动程序资源列表。
+        # 设备驱动程序资源列表。
     winreg.REG_RESOURCE_LIST,
-    # 硬件设置。
+        # 硬件设置。
     winreg.REG_FULL_RESOURCE_DESCRIPTOR,
-    # 硬件资源列表。
+        # 硬件资源列表。
     winreg.REG_RESOURCE_REQUIREMENTS_LIST,
-    # 空字符结尾的字符串。
+        # 空字符结尾的字符串。
     winreg.REG_SZ
 ]
-def create(base_key: Union[HKEYType, str, int],
-           key: Union[str, int],
+
+
+def create(base_key_path: Union[HKEYType, str, int],
+           key_name: Union[str, int],  # 要创建的键的名称，可能是项也可能是值项
            value: Optional[str] = None,
            *,
            type: Literal["item", "value_item"] = "item",
@@ -241,17 +266,16 @@ def create(base_key: Union[HKEYType, str, int],
     value 如果是值项，那么这个值项的 value 是什么
     value_type 值项的值是多少
     """
-    reg_handle = get_handle(base_key)
+    reg_handle = get_handle(base_key_path)
     if reg_handle is None: return
 
     if type == "item":
-        winreg.CreateKeyEx(reg_handle, key)
+        winreg.CreateKeyEx(reg_handle, key_name)
     else:
-        if key == "": ...
-            # TODO 这个地方还没写完
-            # winreg.SetValue(reg_handle, )
+        if key_name == "":
+            winreg.SetValue(get_handle(get_parent(base_key_path)), key_name, value_type, value)
         else:
-            winreg.SetValueEx(reg_handle, key, 0, value_type, value)
+            winreg.SetValueEx(reg_handle, key_name, 0, value_type, value)
 
     winreg.CloseKey(reg_handle)
 
