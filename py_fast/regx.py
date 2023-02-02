@@ -84,7 +84,7 @@ def get_list(key=None):
         value_type: winreg.REG_BINARY
     }
     """
-    root_key, child_key = split_reg_str(key)
+    root_key, child_key, _ = split_reg_str(key)
     if not root_key: return None
 
     key_list = []
@@ -206,10 +206,12 @@ def get_parent(reg_path: str, return_type: Literal["str", "handle"] = "str") -> 
         return get_handle(parent_path)
 
 
-def get_handle(key_path: str) -> Union[HKEYType, int, None]:
+def get_handle(key_path: Union[HKEYType, str]) -> Union[HKEYType, int, None]:
     """
     接受一个键的路径返回打开的 handle
     """
+    if type(key_path) == HKEYType:
+        return key_path
     root_key, sub_key, _ = split_reg_str(key_path)  # 获取根键和子键路径
     if root_key:
         if sub_key:
