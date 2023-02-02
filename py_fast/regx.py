@@ -18,6 +18,8 @@ __all__ = (
 
     # 获取注册表的列表
     'get_list',
+    # 创建注册表项或值项或项的默认值，在创建项的默认值的时候不能给已经存在的项设置默认值，项和默认值的创建是一起的
+    'create',
 )
 
 # 本注册表键下的注册表项定义了文件的类型（或类别）及相关属性。Shell 和 COM 应用程序将使用该注册表键下保存的信息。
@@ -164,22 +166,22 @@ def transform_root_key(key: str) -> Optional[int]:
         return None
 
 
-def split_reg_str(reg_str: str) -> Tuple[Optional[int], Optional[str]]:
-    """用于切割注册表字符串，返回三个值，一个是注册表的根常量，一个是剩余的注册表路径"""
-    if reg_str.strip() == "": return None, None
+def split_reg_str(reg_str: str) -> Tuple[Optional[int], Optional[str], Optional[str]]:
+    """用于切割注册表字符串，返回三个值，一个是注册表的根常量，一个是剩余的注册表路径, 一个是路径中的最后一个项名称"""
+    if reg_str.strip() == "": return None, None, None
 
     path_arr = reg_str.split('\\')
     root_key = path_arr[0]
     if root_key in root_key_map:
         # 说明有根键
         if len(path_arr) > 1:
-            return root_key_map[root_key], reg_str[len(root_key) + 1:]
+            return root_key_map[root_key], reg_str[len(root_key) + 1:], path_arr[-1]
         else:
-            return root_key_map[root_key], None
+            return root_key_map[root_key], None, None
 
     else:
         # 没有根键
-        return None, reg_str
+        return None, reg_str, path_arr[-1]
 
 
 def get_parent(reg_path: str, return_type: Literal["str", "handle"] = "str") -> Union[HKEYType, str, int, None]:
@@ -208,7 +210,7 @@ def get_handle(key_path: str) -> Union[HKEYType, int, None]:
     """
     接受一个键的路径返回打开的 handle
     """
-    root_key, sub_key = split_reg_str(key_path)  # 获取根键和子键路径
+    root_key, sub_key, _ = split_reg_str(key_path)  # 获取根键和子键路径
     if root_key:
         if sub_key:
             return winreg.OpenKeyEx(root_key, sub_key, 0, winreg.KEY_ALL_ACCESS)
@@ -219,7 +221,7 @@ def get_handle(key_path: str) -> Union[HKEYType, int, None]:
 
 
 # 注册表的值类型，参照链接： https://docs.python.org/zh-cn/3/library/winreg.html?highlight=winreg#value-types
-REG_VALUE_TYPE: TypeAlias = Literal[
+RegValueType: TypeAlias = Literal[
     # 任意格式的二进制数据。
     winreg.REG_BINARY,
         # 32 位数字。
@@ -250,13 +252,16 @@ REG_VALUE_TYPE: TypeAlias = Literal[
     winreg.REG_SZ
 ]
 
+# 注册表类型
+RegType: TypeAlias = Union[HKEYType, str, int]
 
-def create(base_key_path: Union[HKEYType, str, int],
+
+def create(base_key_path: RegType,
            key_name: Union[str, int],  # 要创建的键的名称，可能是项也可能是值项
            value: Optional[str] = None,
            *,
            type: Literal["item", "value_item"] = "item",
-           value_type: REG_VALUE_TYPE = winreg.REG_SZ) \
+           value_type: RegValueType = winreg.REG_SZ) \
     -> None:
     """
     创建注册表的项或值,如果只是创建项那么直接写入
@@ -280,14 +285,40 @@ def create(base_key_path: Union[HKEYType, str, int],
     winreg.CloseKey(reg_handle)
 
 
-create_key = create
+def create_item(base_path: RegType, item_name: str) -> None:
+    """创建注册表项"""
+    return create(base_path, item_name)
 
 
-def create_item(): ...  # 创建注册表的项
+# 同 create_item 方法，创建一个注册表项
+create_key = create_item
 
 
-def create_value(): ...  # 专门创建注册表值的方法，无法用来创建项
+def create_value_item(base_path: RegType,
+                      item_name: str,
+                      value: Optional[str],
+                      value_type: RegValueType = winreg.REG_SZ) -> None:
+    # 专门创建注册表值的方法，无法用来创建项
+    return create(base_path, item_name, value, value_type=value_type)
 
+
+create_value = create_value_item
+
+
+def set_value_item(base_path: Union[str, int], item_name: str, value: str,
+                   value_type: RegValueType = winreg.REG_SZ) -> None:
+    """设置值项的值，如果item_name 为空那么表示设置这个项的默认名称对应的值"""
+    if item_name == "":
+        reg_handle = get_parent(base_path, return_type="handle")
+        _, _, last_item = split_reg_str(base_path)
+        winreg.SetValue(reg_handle, last_item, winreg.REG_SZ,value)
+    else:
+        reg_handle = get_handle(base_path)
+        winreg.SetValueEx(reg_handle, item_name, 0, value_type, value)
+    winreg.CloseKey(reg_handle)
+    return None
+
+set_value = set_value_item
 
 def delete(): ...  # 删除键
 
@@ -304,7 +335,6 @@ def delete_value(): ...
 def raname(): ...  # 修改注册表项或值的名称
 
 
-def set_value(): ...  # 设置注册表值的信息
 
 
 def export_file(): ...  # 导出为注册表文件
