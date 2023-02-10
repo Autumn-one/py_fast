@@ -224,45 +224,32 @@ def get_handle(key_path: Union[HKEYType, str]) -> Union[HKEYType, int, None]:
 
 # 注册表的值类型，参照链接： https://docs.python.org/zh-cn/3/library/winreg.html?highlight=winreg#value-types
 RegValueType: TypeAlias = Literal[
-    # 任意格式的二进制数据。
-    winreg.REG_BINARY,
-        # 32 位数字。
-    winreg.REG_DWORD,
-        # 32 位低字节序格式的数字。相当于 REG_DWORD。
-    winreg.REG_DWORD_LITTLE_ENDIAN,
-        # 32 位高字节序格式的数字。
-    winreg.REG_DWORD_BIG_ENDIAN,
-        # 包含环境变量（%PATH%）的字符串，以空字符结尾。
-    winreg.REG_EXPAND_SZ,
-        # Unicode 符号链接。
-    winreg.REG_LINK,
-        # 一串以空字符结尾的字符串，最后以两个空字符结尾。Python 会自动处理这种结尾形式。
-    winreg.REG_MULTI_SZ,
-        # 未定义的类型。
-    winreg.REG_NONE,
-        # 64 位数字。
-    winreg.REG_QWORD,
-        # 64 位低字节序格式的数字。相当于 REG_QWORD。
-    winreg.REG_QWORD_LITTLE_ENDIAN,
-        # 设备驱动程序资源列表。
-    winreg.REG_RESOURCE_LIST,
-        # 硬件设置。
-    winreg.REG_FULL_RESOURCE_DESCRIPTOR,
-        # 硬件资源列表。
-    winreg.REG_RESOURCE_REQUIREMENTS_LIST,
-        # 空字符结尾的字符串。
-    winreg.REG_SZ
+    3,  # winreg.REG_BINARY 任意格式的二进制数据。
+    4,  # winreg.REG_DWORD_LITTLE_ENDIAN 和 winreg.REG_DWORD 等价，32 位数字。
+    5,  # winreg.REG_DWORD_BIG_ENDIAN 32 位高字节序格式的数字。
+    2,  # winreg.REG_EXPAND_SZ 包含环境变量（%PATH%）的字符串，以空字符结尾。
+    6,  # winreg.REG_LINK Unicode 符号链接。
+    7,  # winreg.REG_MULTI_SZ 一串以空字符结尾的字符串，最后以两个空字符结尾。Python 会自动处理这种结尾形式。
+    0,  # winreg.REG_NONE 未定义的类型。
+    11,  # winreg.REG_QWORD 和 winreg.REG_QWORD_LITTLE_ENDIAN 一样 64 位数字。
+    8,  # winreg.REG_RESOURCE_LIST 设备驱动程序资源列表。
+    9,  # winreg.REG_FULL_RESOURCE_DESCRIPTOR 硬件设置。
+    10,  # winreg.REG_RESOURCE_REQUIREMENTS_LIST 硬件资源列表。
+    1  # winreg.REG_SZ 空字符结尾的字符串。
 ]
 
-# 注册表类型
-RegType: TypeAlias = Union[HKEYType, str, int]
+# 注册表键路径的类型
+RegKeyType: TypeAlias = Union[HKEYType, str, int]
+
+# 注册表项目的类型
+RegItemType: TypeAlias = Literal["item", "value_item"]
 
 
-def create(base_key_path: RegType,
+def create(base_key_path: RegKeyType,
            key_name: Union[str, int],  # 要创建的键的名称，可能是项也可能是值项
            value: Optional[str] = None,
            *,
-           type: Literal["item", "value_item"] = "item",
+           type: RegItemType = "item",
            value_type: RegValueType = winreg.REG_SZ) \
     -> None:
     """
@@ -287,7 +274,7 @@ def create(base_key_path: RegType,
     winreg.CloseKey(reg_handle)
 
 
-def create_item(base_path: RegType, item_name: str) -> None:
+def create_item(base_path: RegKeyType, item_name: str) -> None:
     """创建注册表项"""
     return create(base_path, item_name)
 
@@ -296,7 +283,7 @@ def create_item(base_path: RegType, item_name: str) -> None:
 create_key = create_item
 
 
-def create_value_item(base_path: RegType,
+def create_value_item(base_path: RegKeyType,
                       item_name: str,
                       value: Optional[str],
                       value_type: RegValueType = winreg.REG_SZ) -> None:
@@ -313,16 +300,20 @@ def set_value_item(base_path: Union[str, int], item_name: str, value: str,
     if item_name == "":
         reg_handle = get_parent(base_path, return_type="handle")
         _, _, last_item = split_reg_str(base_path)
-        winreg.SetValue(reg_handle, last_item, winreg.REG_SZ,value)
+        winreg.SetValue(reg_handle, last_item, winreg.REG_SZ, value)
     else:
         reg_handle = get_handle(base_path)
         winreg.SetValueEx(reg_handle, item_name, 0, value_type, value)
     winreg.CloseKey(reg_handle)
     return None
 
+
 set_value = set_value_item
 
-def delete(): ...  # 删除键
+
+def delete(reg_or_path: RegKeyType, item_name: str, item_type: RegItemType = "item"):
+    """删除某个注册表的键"""
+    ...
 
 
 remove = delete
@@ -335,8 +326,6 @@ def delete_value(): ...
 
 
 def raname(): ...  # 修改注册表项或值的名称
-
-
 
 
 def export_file(): ...  # 导出为注册表文件
