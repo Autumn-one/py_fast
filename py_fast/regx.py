@@ -311,8 +311,11 @@ def set_value_item(base_path: Union[str, int], item_name: str, value: str,
 set_value = set_value_item
 
 
-def delete(reg_or_path: RegKeyType, item_name: str, item_type: RegItemType = "item"):
-    """删除某个注册表的键"""
+def delete(reg_or_path: RegKeyType, item_name: str, item_type: RegItemType = "item", safe: bool = False):
+    """
+    删除某个注册表的键
+    safe 表示是否安全删除，如果不是安全删除那么有子项也会直接删掉
+    """
     handle = get_handle(reg_or_path)
     if item_type == "item":
         winreg.DeleteKey(handle, item_name)
