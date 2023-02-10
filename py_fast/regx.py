@@ -313,7 +313,12 @@ set_value = set_value_item
 
 def delete(reg_or_path: RegKeyType, item_name: str, item_type: RegItemType = "item"):
     """删除某个注册表的键"""
-    ...
+    handle = get_handle(reg_or_path)
+    if item_type == "item":
+        winreg.DeleteKey(handle, item_name)
+    else:
+        winreg.DeleteValue(handle, item_name)
+
 
 
 remove = delete
