@@ -32,4 +32,5 @@ from py_fast.message_box import *
 # message.alert("你好啊","标题")
 # message.confirm("哈哈哈", "啦啦啦")
 
-message.prompt("请问你叫什么名字","输入名字","默认内容")
+ret = message.prompt("请问你叫什么名字","输入名字")
+print(ret)
