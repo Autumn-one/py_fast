@@ -21,6 +21,11 @@ import py_fast.regx as wreg
 # wreg.get_list(r"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run")
 # print(type(winreg.REG_BINARY))
 
-wreg.delete(r"HKEY_CURRENT_USER\Software\360Safe","aabb", safe=False)
+# wreg.delete(r"HKEY_CURRENT_USER\Software\360Safe","aabb", safe=False)
+
+from py_fast.message_box import *
+
+ret = show_question_box("请问你叫啥","一个问题")
+print(ret)
 
 

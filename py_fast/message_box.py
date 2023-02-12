@@ -1,59 +1,57 @@
-# 封装了系统弹窗的页面
-
 import ctypes
-from ctypes import wintypes
 
-# 加载 WebView2 运行时
-ctypes.WinDLL("WebView2Loader.dll")
+MessageBox = ctypes.windll.user32.MessageBoxW
 
-# 加载 WebView2 API
-webView2Api = ctypes.WinDLL("WebView2Api.dll")
-
-# 定义回调函数
-def on_navigation_starting(webView, args, cancelling):
-    url = args.get_uri()
-    print("正在导航到", url)
-
-# 创建 CoreWebView2Environment
-webView2Environment = ctypes.c_void_p()
-result = webView2Api.CreateCoreWebView2EnvironmentWithDetails(
-    None,
-    None,
-    None,
-    ctypes.byref(webView2Environment)
+__all__ = (
+    "show_message_box",
+    "show_info_box",
+    "show_warning_box",
+    "show_error_box",
+    "show_question_box"
 )
 
-# 创建 CoreWebView2
-webView2 = ctypes.c_void_p()
-result = webView2Api.CreateCoreWebView2(
-    webView2Environment,
-    None,
-    ctypes.byref(webView2)
-)
 
-# 设置回调函数
-on_navigation_starting_callback_type = ctypes.CFUNCTYPE(
-    None,
-    ctypes.c_void_p,
-    ctypes.c_void_p,
-    ctypes.c_void_p
-)
-on_navigation_starting_callback = on_navigation_starting_callback_type(
-    on_navigation_starting
-)
+def show_message_box(text: str, title: str = "消息", type: int = 0x40):
+    """
+    显示消息对话框
+    text 表示对话框中显示的文本
+    title 表示对话框标题
+    type 表示对话框的类型
+    """
+    return MessageBox(None, text, title, type)
 
-result = webView2Api.AddCoreWebView2NavigationStartingEvent(
-    webView2,
-    on_navigation_starting_callback,
-    None
-)
 
-# 导航到 URL
-result = webView2Api.Navigate(webView2, "https://www.microsoft.com")
+def show_info_box(text: str, title: str = "消息"):
+    """
+    显示信息对话框
+    text 表示对话框中显示的文本
+    title 表示对话框标题
+    """
+    return show_message_box(text, title, 0x40)
 
-# 等待用户输入以关闭应用程序
-input()
 
-# 清理
-result = webView2Api.CloseCoreWebView2(webView2)
-result = webView2Api.DestroyCoreWebView2Environment(webView2Environment)
+def show_warning_box(text: str, title: str = "警告"):
+    """
+    显示警告对话框
+    text 表示对话框中显示的文本
+    title 表示对话框标题
+    """
+    return show_message_box(text, title, 0x30)
+
+
+def show_error_box(text: str, title: str = "错误"):
+    """
+    显示错误对话框
+    text 表示对话框中显示的文本
+    title 表示对话框标题
+    """
+    return show_message_box(text, title, 0x10)
+
+
+def show_question_box(text: str, title: str = "询问"):
+    """
+    显示询问对话框
+    text 表示对话框中显示的文本
+    title 表示对话框标题
+    """
+    return show_message_box(text, title, 0x20)
