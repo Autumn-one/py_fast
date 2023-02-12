@@ -2,8 +2,8 @@
 import winreg
 import py_fast.regx as wreg
 
-handle = winreg.OpenKeyEx(winreg.HKEY_CURRENT_USER, r"Software\360Safe", 0, winreg.KEY_ALL_ACCESS)
-winreg.DeleteKey(handle,"ddd")
+# handle = winreg.OpenKeyEx(winreg.HKEY_CURRENT_USER, r"Software\360Safe", 0, winreg.KEY_ALL_ACCESS)
+# winreg.DeleteKey(handle,"ddd")
 # print(type(handle) == winreg.HKEYType)
 # print(str(handle))
 
@@ -20,3 +20,7 @@ winreg.DeleteKey(handle,"ddd")
 
 # wreg.get_list(r"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run")
 # print(type(winreg.REG_BINARY))
+
+wreg.delete(r"HKEY_CURRENT_USER\Software\360Safe","aabb", safe=False)
+
+

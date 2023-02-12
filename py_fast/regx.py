@@ -242,14 +242,14 @@ RegValueType: TypeAlias = Literal[
 RegKeyType: TypeAlias = Union[HKEYType, str, int]
 
 # 注册表项目的类型
-RegItemType: TypeAlias = Literal["item", "value_item"]
+RegItemType: TypeAlias = Literal["key_item", "value_item"]
 
 
 def create(base_key_path: RegKeyType,
            key_name: Union[str, int],  # 要创建的键的名称，可能是项也可能是值项
            value: Optional[str] = None,
            *,
-           type: RegItemType = "item",
+           type: RegItemType = "key_item",
            value_type: RegValueType = winreg.REG_SZ) \
     -> None:
     """
@@ -310,18 +310,40 @@ def set_value_item(base_path: Union[str, int], item_name: str, value: str,
 
 set_value = set_value_item
 
+def delete(reg_or_path: RegKeyType, item_name: str, item_type: RegItemType = "key_item", safe: bool = False):
+    """
+    删除某个注册表的键或值键
+    reg_or_path 是注册表路径字符串或者注册表类型
+    item_name 表示要删除的项
+    item_type 删除值项还是项
+    safe 表示是否安全删除，True 表示只能删除不为空的项，False 表示会递归删除自身和后代所有项
+    """
+    handle = get_handle(reg_or_path)  # 获取注册表的对象
+    if item_type == "key_item":
+        if safe:
+            winreg.DeleteKey(handle, item_name)
+        else:
+            # 递归删除下面的所有后代项
+            def recursive_delete(handle: HKEYType, subkey: str):
+                sub_handle = winreg.OpenKey(handle, subkey, 0, winreg.KEY_ALL_ACCESS)
+                info = winreg.QueryInfoKey(sub_handle)
+                # 删除该键下所有的键
+                for i in range(info[0]):
+                    s = winreg.EnumKey(sub_handle, i)
+                    recursive_delete(sub_handle, s)
+                # 删除该键下所有的值
+                for i in range(info[1]):
+                    n, v, t = winreg.EnumValue(sub_handle, i)
+                    winreg.DeleteValue(sub_handle, n)
+                winreg.CloseKey(sub_handle)
+                winreg.DeleteKey(handle, subkey)
 
-def delete(reg_or_path: RegKeyType, item_name: str, item_type: RegItemType = "item", safe: bool = False):
-    """
-    删除某个注册表的键
-    safe 表示是否安全删除，如果不是安全删除那么有子项也会直接删掉
-    """
-    handle = get_handle(reg_or_path)
-    if item_type == "item":
-        winreg.DeleteKey(handle, item_name)
+            recursive_delete(handle, item_name)
+
     else:
         winreg.DeleteValue(handle, item_name)
 
+    winreg.CloseKey(handle)
 
 
 remove = delete
