@@ -1,6 +1,7 @@
 # from py_fast.regx import get_list
 import winreg
 import py_fast.regx as wreg
+import py_fast.message_box as message
 
 # handle = winreg.OpenKeyEx(winreg.HKEY_CURRENT_USER, r"Software\360Safe", 0, winreg.KEY_ALL_ACCESS)
 # winreg.DeleteKey(handle,"ddd")
@@ -25,7 +26,10 @@ import py_fast.regx as wreg
 
 from py_fast.message_box import *
 
-ret = show_question_box("请问你叫啥","一个问题")
-print(ret)
+# ret = show_question_box("请问你叫啥","一个问题")
+# print(ret)
 
+# message.alert("你好啊","标题")
+# message.confirm("哈哈哈", "啦啦啦")
 
+message.prompt("请问你叫什么名字","输入名字","默认内容")

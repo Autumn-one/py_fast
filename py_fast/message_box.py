@@ -1,57 +1,61 @@
 import ctypes
 
-MessageBox = ctypes.windll.user32.MessageBoxW
-
-__all__ = (
-    "show_message_box",
-    "show_info_box",
-    "show_warning_box",
-    "show_error_box",
-    "show_question_box"
-)
+MB_OK = 0x0
+MB_OKCANCEL = 0x1
+MB_YESNO = 0x4
+MB_ICONINFORMATION = 0x40
+MB_ICONWARNING = 0x30
+MB_ICONERROR = 0x10
 
 
-def show_message_box(text: str, title: str = "消息", type: int = 0x40):
+def _show_message_box(message: str, title: str, type_: int, icon: int) -> int:
+    """显示windows的消息框
+
+    :param message: 消息内容
+    :param title: 消息标题
+    :param type_: 消息类型
+    :param icon: 消息图标
+    :return: 用户按钮的选择
     """
-    显示消息对话框
-    text 表示对话框中显示的文本
-    title 表示对话框标题
-    type 表示对话框的类型
-    """
-    return MessageBox(None, text, title, type)
+    return ctypes.windll.user32.MessageBoxW(None, message, title, type_ | icon)
 
 
-def show_info_box(text: str, title: str = "消息"):
+def alert(message: str, title: str = "提示") -> None:
+    """弹出一个普通的消息框
+
+    :param message: 消息内容
+    :param title: 消息标题
     """
-    显示信息对话框
-    text 表示对话框中显示的文本
-    title 表示对话框标题
-    """
-    return show_message_box(text, title, 0x40)
+    _show_message_box(message, title, MB_OK, MB_ICONINFORMATION)
 
 
-def show_warning_box(text: str, title: str = "警告"):
+def confirm(message: str, title: str = "确认") -> bool:
+    """弹出一个确认框
+
+    :param message: 消息内容
+    :param title: 消息标题
+    :return: True 表示确认，False 表示取消
     """
-    显示警告对话框
-    text 表示对话框中显示的文本
-    title 表示对话框标题
-    """
-    return show_message_box(text, title, 0x30)
+    return _show_message_box(message, title, MB_YESNO, MB_ICONWARNING) == 6
 
 
-def show_error_box(text: str, title: str = "错误"):
-    """
-    显示错误对话框
-    text 表示对话框中显示的文本
-    title 表示对话框标题
-    """
-    return show_message_box(text, title, 0x10)
+def prompt(message: str, title: str = "请输入", default: str = "") -> str:
+    """弹出一个文本输入框
 
+    :param message: 消息内容
+    :param title: 消息标题
+    :param default: 输入框默认值
+    :return: 用户输入的字符串
+    """
+    buf = ctypes.create_unicode_buffer(1024)
+    buf.value = default
+    if ctypes.windll.user32.InputBoxW(message, title, buf, 1024) == 1:
+        return buf.value
+    else:
+        return None
 
-def show_question_box(text: str, title: str = "询问"):
-    """
-    显示询问对话框
-    text 表示对话框中显示的文本
-    title 表示对话框标题
-    """
-    return show_message_box(text, title, 0x20)
+__all__ = [
+    "alert",
+    "confirm",
+    "prompt"
+]
