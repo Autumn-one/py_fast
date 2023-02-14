@@ -242,7 +242,7 @@ RegValueType: TypeAlias = Literal[
 RegKeyType: TypeAlias = Union[HKEYType, str, int]
 
 # 注册表项目的类型
-RegItemType: TypeAlias = Literal["key_item", "value_item"]
+RegItemType: TypeAlias = Literal["key-item", "value-item"]
 
 
 def create(base_key_path: RegKeyType,
@@ -310,7 +310,7 @@ def set_value_item(base_path: Union[str, int], item_name: str, value: str,
 
 set_value = set_value_item
 
-def delete(reg_or_path: RegKeyType, item_name: str, item_type: RegItemType = "key_item", safe: bool = False):
+def delete(reg_or_path: RegKeyType, item_name: str, item_type: RegItemType = "key-item", safe: bool = False):
     """
     删除某个注册表的键或值键
     reg_or_path 是注册表路径字符串或者注册表类型
@@ -349,10 +349,18 @@ def delete(reg_or_path: RegKeyType, item_name: str, item_type: RegItemType = "ke
 remove = delete
 
 
-def delete_item(): ...
+def delete_item(reg_or_path: RegKeyType, item_name: str):
+    """
+    接受项的名称删除一个项
+    """
+    return delete(reg_or_path, item_name, item_type="key-item")
 
 
-def delete_value(): ...
+def delete_value(reg_or_path: RegKeyType, item_name: str):
+    """
+    接受项的名称删除一个值项
+    """
+    return delete(reg_or_path, item_name, item_type="value-item")
 
 
 def raname(): ...  # 修改注册表项或值的名称
