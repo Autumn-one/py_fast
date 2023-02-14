@@ -2,6 +2,7 @@
 import winreg
 import py_fast.regx as wreg
 import py_fast.message_box as message
+import ctypes
 
 # handle = winreg.OpenKeyEx(winreg.HKEY_CURRENT_USER, r"Software\360Safe", 0, winreg.KEY_ALL_ACCESS)
 # winreg.DeleteKey(handle,"ddd")
@@ -32,5 +33,8 @@ from py_fast.message_box import *
 # message.alert("你好啊","标题")
 # message.confirm("哈哈哈", "啦啦啦")
 
-ret = message.prompt("请问你叫什么名字","输入名字")
-print(ret)
+# ret = message.prompt("请问你叫什么名字","输入名字")
+
+# print(ret)
+
+print(ctypes.windll.user32.InputBox)

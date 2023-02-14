@@ -39,23 +39,20 @@ def confirm(message: str, title: str = "确认") -> bool:
     return _show_message_box(message, title, MB_YESNO, MB_ICONWARNING) == 6
 
 
-def prompt(title: str, message: str) -> str:
-    """
-    弹出一个对话框，用于获取用户输入的字符串
+def prompt(message: str, title: str = "请输入", default: str = "") -> str:
+    """弹出一个文本输入框  fixme 这个函数有问题，后续再改
 
-    :param title: 对话框的标题
-    :param message: 对话框中的消息提示
-    :return: 用户在对话框中输入的字符串
+    :param message: 消息内容
+    :param title: 消息标题
+    :param default: 输入框默认值
+    :return: 用户输入的字符串
     """
-    user32 = ctypes.windll.user32
-    buf = ctypes.create_unicode_buffer(512)
-    result = user32.GetWindowTextW(
-        user32.GetForegroundWindow(),
-        buf,
-        512
-    )
-    buf = buf[:result]
-    return buf
+    buf = ctypes.create_unicode_buffer(1024)
+    buf.value = default
+    if ctypes.windll.user32.InputBoxW(message, title, buf, 1024) == 1:
+        return buf.value
+    else:
+        return None
 
 __all__ = [
     "alert",
