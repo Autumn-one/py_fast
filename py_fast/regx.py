@@ -310,6 +310,7 @@ def set_value_item(base_path: Union[str, int], item_name: str, value: str,
 
 set_value = set_value_item
 
+
 def delete(reg_or_path: RegKeyType, item_name: str, item_type: RegItemType = "key-item", safe: bool = False):
     """
     删除某个注册表的键或值键
@@ -366,7 +367,19 @@ def delete_value(reg_or_path: RegKeyType, item_name: str):
 def raname(): ...  # 修改注册表项或值的名称
 
 
-def export_file(): ...  # 导出为注册表文件
+def export_reg(reg_or_path: RegKeyType, file_name: str):
+    """导出注册表"""
+    handle = get_handle(reg_or_path)
+    winreg.SaveKey(handle, file_name)
 
 
-def load_file(): ...  # 加载注册表文件
+export_file = export_reg
+
+
+def import_reg(reg_or_path: RegKeyType, sub_key: str, file_name: str):
+    """通过文件导入注册表"""
+    handle = get_handle(reg_or_path)
+    winreg.LoadKey(handle, sub_key, file_name)
+
+
+import_file = import_reg
