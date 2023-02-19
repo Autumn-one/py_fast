@@ -3,6 +3,7 @@ import winreg
 import py_fast.regx as wreg
 import py_fast.message_box as message
 import ctypes
+import py_fast.windowx as wx
 
 # handle = winreg.OpenKeyEx(winreg.HKEY_CURRENT_USER, r"Software\360Safe", 0, winreg.KEY_ALL_ACCESS)
 # winreg.DeleteKey(handle,"ddd")
@@ -37,4 +38,7 @@ from py_fast.message_box import *
 
 # print(ret)
 
-print(ctypes.windll.user32.InputBox)
+# print(ctypes.windll.user32.InputBox)
+
+hd = wx.find_window_by_title("qq")
+print(hd)

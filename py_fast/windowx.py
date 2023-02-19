@@ -170,6 +170,21 @@ def get_front_window_path():
     return process_path
 
 
+def get_front_window():
+    """获取最前面的窗口句柄"""
+    return win32gui.GetForegroundWindow()
+
+
+def set_front_window(hwnd):
+    """设置指定的句柄为最前面的窗口"""
+    return win32gui.SetForegroundWindow(hwnd)
+
+
+def get_window_title(hwnd):
+    """获取传入窗口句柄的标题"""
+    return win32gui.GetWindowText(hwnd)
+
+
 def get_all_process_path():
     """获取所有进程的路径"""
     pids = win32process.EnumProcesses()
@@ -192,6 +207,16 @@ def is_frozen():
         return False
 
 
+def find_window_by_title(title):
+    """通过标题获取窗口的句柄"""
+    try:
+        return win32gui.FindWindow(None, title)
+    except Exception as ex:
+        print('error calling win32gui.FindWindow ' + str(ex))
+        return -1
+
+
 __all__ = (
-'get_log_time', 'get_source_path', 'error_log', 'get_real_path', 'send_ctrl_c', 'get_front_window_path', 'is_frozen',
-'parse_argv', 'get_all_process_path')
+    'get_log_time', 'get_source_path', 'error_log', 'get_real_path', 'send_ctrl_c', 'get_front_window_path',
+    'is_frozen',
+    'parse_argv', 'get_all_process_path')
