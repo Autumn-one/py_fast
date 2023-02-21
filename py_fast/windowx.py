@@ -5,6 +5,7 @@ from pathlib import Path
 import time, traceback, sys, os, win32api, win32con, win32gui, win32process
 from win32com.client import Dispatch
 import __main__
+from typing import List, Dict
 
 
 def parse_argv():
@@ -216,7 +217,36 @@ def find_window_by_title(title):
         return -1
 
 
+def get_window_titles_and_processes() -> List[Dict[str, str]]:
+    """
+    获取所有窗口标题和进程路径
+
+    返回值：
+    [
+        {
+            "title": 窗口标题,
+            "process": 进程路径
+        },
+        ...
+    ]
+    """
+    window_titles_and_processes: List[Dict[str, str]] = []
+
+    # 获取所有窗口的句柄
+    def callback(hwnd: int, _) -> bool:
+        # 如果窗口可见，则获取窗口标题和进程路径
+        if win32gui.IsWindowVisible(hwnd):
+            title: str = win32gui.GetWindowText(hwnd)
+            pid: int = win32process.GetWindowThreadProcessId(hwnd)[1]
+            process_path: str = win32process.GetModuleFileNameEx(win32api.OpenProcess(0x0400, False, pid), 0)
+            window_titles_and_processes.append({"title": title, "process": process_path})
+        return True
+    win32gui.EnumWindows(callback, None)
+
+    return window_titles_and_processes
+
+
 __all__ = (
     'get_log_time', 'get_source_path', 'error_log', 'get_real_path', 'send_ctrl_c', 'get_front_window_path',
     'is_frozen',
-    'parse_argv', 'get_all_process_path')
+    'parse_argv', 'get_all_process_path', 'get_window_titles_and_processes')

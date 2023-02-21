@@ -40,5 +40,8 @@ from py_fast.message_box import *
 
 # print(ctypes.windll.user32.InputBox)
 
-hd = wx.find_window_by_title("qq")
-print(hd)
+# hd = wx.find_window_by_title("qq")
+
+# print(hd)
+# wl = wx.get_window_titles_and_processes()
+# print(wl)
