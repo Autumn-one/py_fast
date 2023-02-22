@@ -1,1 +1,1 @@
-from osx import *
+from .osx import *

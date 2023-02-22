@@ -5,7 +5,12 @@ from pathlib import Path
 import time, traceback, sys, os, win32api, win32con, win32gui, win32process
 from win32com.client import Dispatch
 import __main__
-from typing import List, Dict
+from typing import List, Dict, Optional
+
+__all__ = (
+    'get_log_time', 'get_source_path', 'error_log', 'get_real_path', 'send_ctrl_c', 'get_front_window_path',
+    'is_frozen',
+    'parse_argv', 'get_all_process_path', 'get_window_titles_and_processes', 'move_window')
 
 
 def parse_argv():
@@ -241,12 +246,70 @@ def get_window_titles_and_processes() -> List[Dict[str, str]]:
             process_path: str = win32process.GetModuleFileNameEx(win32api.OpenProcess(0x0400, False, pid), 0)
             window_titles_and_processes.append({"title": title, "process": process_path})
         return True
+
     win32gui.EnumWindows(callback, None)
 
     return window_titles_and_processes
 
 
-__all__ = (
-    'get_log_time', 'get_source_path', 'error_log', 'get_real_path', 'send_ctrl_c', 'get_front_window_path',
-    'is_frozen',
-    'parse_argv', 'get_all_process_path', 'get_window_titles_and_processes')
+def move_window(
+        x: int = 0,
+        y: int = 0,
+        hwnd: Optional[int] = None,
+) -> bool:
+    """
+    移动窗口
+
+    参数：
+    - hwnd: 窗口句柄，默认为 None，表示当前激活的窗口
+    - x: 要移动到的 x 坐标，默认为 0
+    - y: 要移动到的 y 坐标，默认为 0
+
+    返回值：
+    - 如果窗口移动成功，返回 True；否则返回 False
+    """
+    # 如果未传入 hwnd，使用 GetForegroundWindow 函数获取当前激活的窗口句柄
+    if hwnd is None:
+        hwnd = win32gui.GetForegroundWindow()
+
+    # 获取窗口当前位置和大小
+    left, top, right, bottom = win32gui.GetWindowRect(hwnd)
+    width = right - left
+    height = bottom - top
+
+    # 计算窗口要移动到的位置
+    new_left = x
+    new_top = y
+    new_right = new_left + width
+    new_bottom = new_top + height
+
+    # 移动窗口
+    result = win32gui.MoveWindow(hwnd, new_left, new_top, width, height, True)
+
+    return result
+
+import win32api
+from typing import Tuple
+
+
+def get_mouse_pos() -> Tuple[int, int]:
+    """
+    获取当前鼠标位置
+    :return: (x, y) 坐标元组
+    """
+    x, y = win32api.GetCursorPos()
+    return x, y
+
+def get_window_border_width(hwnd: int) -> tuple[int, int, int, int]:
+    """
+    获取窗口的边框宽度（左边框、上边框、右边框、下边框）
+    """
+    style = win32api.GetWindowLong(hwnd, win32con.GWL_STYLE)
+    ex_style = win32api.GetWindowLong(hwnd, win32con.GWL_EXSTYLE)
+    rect = win32gui.GetWindowRect(hwnd)
+    client_rect = win32gui.GetClientRect(hwnd)
+    border_width_left = (rect[2] - rect[0] - client_rect[2]) // 2
+    border_width_top = (rect[3] - rect[1] - client_rect[3]) - border_width_left
+    border_width_right = border_width_left + (rect[2] - rect[0] - client_rect[2]) % 2
+    border_width_bottom = border_width_top + (rect[3] - rect[1] - client_rect[3]) % 2
+    return border_width_left, border_width_top, border_width_right, border_width_bottom

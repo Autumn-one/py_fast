@@ -2,7 +2,7 @@ from os import path
 import os
 from pathlib import Path
 import re
-from sysx import *
+from .sysx import *
 
 is_abs = path.isabs # 判断是否是绝对路径
 is_file = path.isfile # 判断是否是文件
