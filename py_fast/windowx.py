@@ -2,10 +2,12 @@
 
 from os import path
 from pathlib import Path
-import time, traceback, sys, os, win32api, win32con, win32gui, win32process
+import time, traceback, sys, os, win32api, win32con, win32gui, win32process, win32com
+
+import win32gui_struct
 from win32com.client import Dispatch
 import __main__
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Callable
 
 __all__ = (
     'get_log_time', 'get_source_path', 'error_log', 'get_real_path', 'send_ctrl_c', 'get_front_window_path',
@@ -313,3 +315,73 @@ def get_window_border_width(hwnd: int) -> tuple[int, int, int, int]:
     border_width_right = border_width_left + (rect[2] - rect[0] - client_rect[2]) % 2
     border_width_bottom = border_width_top + (rect[3] - rect[1] - client_rect[3]) % 2
     return border_width_left, border_width_top, border_width_right, border_width_bottom
+
+
+def maximize_window(hwnd: Optional[int] = None) -> None:
+    """
+    最大化指定窗口，如果未指定窗口句柄则最大化当前激活窗口。
+
+    Args:
+        hwnd: 可选，指定要最大化的窗口句柄。
+
+    Returns:
+        None
+
+    """
+    if hwnd is None:
+        hwnd = win32gui.GetForegroundWindow()
+    win32gui.ShowWindow(hwnd, win32con.SW_MAXIMIZE)
+
+def minimize_window(hwnd: Optional[int] = None) -> None:
+    """
+    最小化指定窗口，如果未指定窗口句柄则最小化当前激活窗口。
+
+    Args:
+        hwnd: 可选，指定要最小化的窗口句柄。
+
+    Returns:
+        None
+
+    """
+    if hwnd is None:
+        hwnd = win32gui.GetForegroundWindow()
+    win32gui.ShowWindow(hwnd, win32con.SW_MINIMIZE)
+
+def register_mousemove_callback(callback_func: Callable[[int, int], None]) -> Tuple[int, Optional[Callable]]:
+    """
+    注册鼠标移动回调函数。
+
+    Args:
+        callback_func: 回调函数，用于处理鼠标移动事件。
+
+    Returns:
+        一个元组，包含钩子句柄和可选的回调函数。可以使用返回的钩子句柄取消钩子。
+
+    """
+    def mousemove_callback(hwnd: int, msg: int, wparam: int, lparam: int) -> bool:
+        x = win32api.LOWORD(lparam)
+        y = win32api.HIWORD(lparam)
+        callback_func(x, y)
+        return True
+
+    hook_id = win32gui.SetWindowsHookEx(win32con.WH_MOUSE_LL, mousemove_callback, win32api.GetModuleHandle(None), 0)
+    return hook_id, mousemove_callback
+
+def unregister_mousemove_callback(hook_id: int, callback: Optional[Callable] = None) -> None:
+    """
+    取消鼠标移动回调函数。
+
+    Args:
+        hook_id: 钩子句柄，用于取消注册的钩子。
+        callback: 可选，注册时传入的回调函数。如果未提供，则不会从系统中删除回调函数。
+
+    Returns:
+        None
+
+    """
+    if callback is None:
+        win32gui.UnhookWindowsHookEx(hook_id)
+    else:
+        win32gui.UnhookWindowsHookEx(hook_id) # 先取消钩子
+        callback_pointer = win32api.HMODULE(callback)  # 获取回调函数指针
+        win32api.FreeLibrary(callback_pointer)  # 释放指针引用的库文件
