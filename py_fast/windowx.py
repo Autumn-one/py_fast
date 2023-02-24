@@ -1,13 +1,20 @@
 """pywin32 的封装"""
 
+import __main__
+import os
+import sys
+import time
+import traceback
+import win32con
+import win32gui
+import win32process
 from os import path
 from pathlib import Path
-import time, traceback, sys, os, win32api, win32con, win32gui, win32process, win32com
+from typing import List, Dict, Optional, Callable, Any
 
-import win32gui_struct
+import keyboard
+import mouse
 from win32com.client import Dispatch
-import __main__
-from typing import List, Dict, Optional, Callable
 
 __all__ = (
     'get_log_time', 'get_source_path', 'error_log', 'get_real_path', 'send_ctrl_c', 'get_front_window_path',
@@ -347,41 +354,33 @@ def minimize_window(hwnd: Optional[int] = None) -> None:
         hwnd = win32gui.GetForegroundWindow()
     win32gui.ShowWindow(hwnd, win32con.SW_MINIMIZE)
 
-def register_mousemove_callback(callback_func: Callable[[int, int], None]) -> Tuple[int, Optional[Callable]]:
+
+def register_keyboard_events(on_press: Callable[[Any], None]) -> None:
+    """注册系统的键盘钩子"""
+    # def on_press(event: keyboard.KeyboardEvent) -> None:
+    #     # 获取按键名称和扫描码
+    #     name = event.name
+    #     scan_code = event.scan_code
+    #     # 打印按键信息
+    #     print(f"You pressed {name} with scan code {scan_code}")
+
+    # 注册一个全局的热键钩子，当任意按键被按下时调用on_press函数
+    keyboard.on_press(on_press)
+    # 开始监听键盘事件，直到用户终止程序或者触发异常
+    keyboard.wait()
+
+
+def register_mouse_move_events(mouse_move_callback: Callable[[Any], None]):
     """
-    注册鼠标移动回调函数。
-
-    Args:
-        callback_func: 回调函数，用于处理鼠标移动事件。
-
-    Returns:
-        一个元组，包含钩子句柄和可选的回调函数。可以使用返回的钩子句柄取消钩子。
-
+    注册系统的鼠标移动回调
     """
-    def mousemove_callback(hwnd: int, msg: int, wparam: int, lparam: int) -> bool:
-        x = win32api.LOWORD(lparam)
-        y = win32api.HIWORD(lparam)
-        callback_func(x, y)
-        return True
+    # def mouse_move_callback(event: mouse.MoveEvent) -> None:
+    #     # 打印鼠标的坐标信息
+    #     print(event)
 
-    hook_id = win32gui.SetWindowsHookEx(win32con.WH_MOUSE_LL, mousemove_callback, win32api.GetModuleHandle(None), 0)
-    return hook_id, mousemove_callback
+    # 注册回调函数到mouse模块中，让它在每次鼠标移动时被调用
+    mouse.hook(mouse_move_callback)
 
-def unregister_mousemove_callback(hook_id: int, callback: Optional[Callable] = None) -> None:
-    """
-    取消鼠标移动回调函数。
-
-    Args:
-        hook_id: 钩子句柄，用于取消注册的钩子。
-        callback: 可选，注册时传入的回调函数。如果未提供，则不会从系统中删除回调函数。
-
-    Returns:
-        None
-
-    """
-    if callback is None:
-        win32gui.UnhookWindowsHookEx(hook_id)
-    else:
-        win32gui.UnhookWindowsHookEx(hook_id) # 先取消钩子
-        callback_pointer = win32api.HMODULE(callback)  # 获取回调函数指针
-        win32api.FreeLibrary(callback_pointer)  # 释放指针引用的库文件
+    # 等待用户按下Ctrl+C来退出程序
+    print("Press Ctrl+C to exit")
+    mouse.wait()
