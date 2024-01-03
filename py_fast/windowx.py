@@ -417,33 +417,35 @@ def is_admin() -> bool:
     except:
         return False
 
-def run_as_admin(argv: Optional[List[str]] = None, debug: bool = False) -> Optional[bool]:
+def run_as_admin(executable_path: Optional[str] = None, argv: Optional[list[str]] = None, debug: bool = False) -> Optional[bool]:
     """
-    如果程序不是以管理员权限运行，则尝试以管理员权限重启程序。
+    以管理员权限运行指定的程序或重新以管理员权限启动当前程序。
 
-    :param argv: 命令行参数列表，默认为None，此时使用sys.argv。
-    :param debug: 是否打印调试信息，默认为False。
+    :param executable_path: 要以管理员权限运行的程序的路径。如果为None，则重启当前程序。
+    :param argv: 命令行参数列表。默认为None，此时使用sys.argv。
+    :param debug: 是否打印调试信息。默认为False。
     :return: 如果程序已是管理员权限或重启成功则返回True，用户拒绝提升权限返回False，程序重启中返回None。
     """
     shell32 = ctypes.windll.shell32
-    if argv is None and shell32.IsUserAnAdmin():
-        # 如果已经是管理员权限，则直接运行
-        return True
+
+    if argv is None:
+        argv = sys.argv
+    if executable_path is None:
+        executable_path = sys.executable
+
+    if hasattr(sys, '_MEIPASS'):
+        # 支持PyInstaller打包后的可执行文件
+        arguments = map(str, argv[1:])
     else:
-        if argv is None:
-            argv = sys.argv
-        if hasattr(sys, '_MEIPASS'):
-            # 支持PyInstaller打包后的可执行文件
-            arguments = map(str, argv[1:])
-        else:
-            arguments = map(str, argv)
-        argument_line = u' '.join(arguments)
-        executable = str(sys.executable)
-        if debug:
-            print('命令行:', executable, argument_line)
-        ret = shell32.ShellExecuteW(None, "runas", executable, argument_line, None, 1)
-        if ret <= 32:
-            return False
-        return None
+        arguments = map(str, argv)
+
+    argument_line = u' '.join(arguments)
+    if debug:
+        print('命令行:', executable_path, argument_line)
+
+    ret = shell32.ShellExecuteW(None, "runas", executable_path, argument_line, None, 1)
+    if ret <= 32:
+        return False
+    return None
 
 
