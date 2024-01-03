@@ -4,12 +4,13 @@ import __main__
 import ctypes
 import os
 import sys
+import threading
 import time
+import tkinter as tk
 import traceback
 from os import path
 from pathlib import Path
 from typing import List, Dict, Optional, Callable, Any
-from ctypes import wintypes
 
 import keyboard
 import mouse
@@ -449,18 +450,67 @@ def run_as_admin(executable_path: Optional[str] = None, argv: Optional[list[str]
         return False
     return None
 
-def is_taskbar_hidden() -> bool:
+
+def is_current_window_maximized() -> bool:
     """
-    检测Windows任务栏是否被隐藏。
+    检测当前窗口是否是最大化。
 
-    :return: 如果任务栏被隐藏返回True，否则返回False。
+    :return: 如果当前窗口是最大化返回True，否则返回False。
     """
-    taskbar_hwnd = win32gui.FindWindow("Shell_TrayWnd", None)
+    # 获取当前处于前台的窗口句柄
+    hwnd = win32gui.GetForegroundWindow()
 
-    if taskbar_hwnd:
-        # 获取任务栏的窗口状态
-        placement = win32gui.GetWindowPlacement(taskbar_hwnd)
-        # 检查任务栏是否最小化或隐藏
-        return placement[1] == win32con.SW_SHOWMINIMIZED or placement[1] == win32con.SW_HIDE
+    # 获取窗口的放置状态
+    placement = win32gui.GetWindowPlacement(hwnd)
 
-    return False
+    # 检查窗口是否处于最大化状态
+    return placement[1] == win32con.SW_SHOWMAXIMIZED
+
+
+
+def is_current_window_minimized() -> bool:
+    """
+    检测当前窗口是否是最小化。
+
+    :return: 如果当前窗口是最小化返回True，否则返回False。
+    """
+    # 获取当前处于前台的窗口句柄
+    hwnd = win32gui.GetForegroundWindow()
+
+    # 获取窗口的放置状态
+    placement = win32gui.GetWindowPlacement(hwnd)
+
+    # 检查窗口是否处于最小化状态
+    return placement[1] == win32con.SW_SHOWMINIMIZED
+
+
+def show_floating_message(message: str, duration: int = 3000, offset: tuple = None):
+    """
+    在屏幕上显示一个浮动的消息提示。
+
+    :param message: 要显示的文本。
+    :param duration: 消息显示的持续时间（毫秒），默认为3000毫秒。
+    :param offset: 消息框的偏移量，格式为(x, y)。如果为None，则显示在屏幕中间。
+    """
+    def message_window():
+        popup = tk.Tk()
+        popup.overrideredirect(True)  # 无边框窗口
+        popup.attributes("-topmost", True)  # 窗口置顶
+        popup.geometry(f"+{offset_x}+{offset_y}")  # 设置位置
+        label = tk.Label(popup, text=message, bg="black", fg="white", padx=10, pady=5)
+        label.pack()
+        popup.after(duration, popup.destroy)  # 设置持续时间后自动销毁
+        popup.mainloop()
+
+    # 创建一个临时窗口以获取屏幕尺寸
+    temp_window = tk.Tk()
+    screen_width = temp_window.winfo_screenwidth()
+    screen_height = temp_window.winfo_screenheight()
+    temp_window.destroy()
+
+    # 计算消息窗口的位置
+    offset_x = (screen_width // 2) if offset is None else offset[0]
+    offset_y = (screen_height // 2) if offset is None else offset[1]
+
+    # 创建并启动线程
+    threading.Thread(target=message_window, daemon=True).start()
