@@ -1,19 +1,20 @@
 """pywin32 的封装"""
 
 import __main__
+import ctypes
 import os
 import sys
 import time
 import traceback
-import win32con
-import win32gui
-import win32process
 from os import path
 from pathlib import Path
 from typing import List, Dict, Optional, Callable, Any
 
 import keyboard
 import mouse
+import win32con
+import win32gui
+import win32process
 from win32com.client import Dispatch
 
 __all__ = (
@@ -384,3 +385,65 @@ def register_mouse_move_events(mouse_move_callback: Callable[[Any], None]):
     # 等待用户按下Ctrl+C来退出程序
     print("Press Ctrl+C to exit")
     mouse.wait()
+
+
+def get_input_chinese_and_english_status():
+    """
+    得到输入法的中英文的状态
+    """
+    imm32 = ctypes.windll.imm32
+    user32 = ctypes.windll.user32
+
+    # 获取 ImmGetDefaultIMEWnd 函数
+    ImmGetDefaultIMEWnd = imm32.ImmGetDefaultIMEWnd
+
+    # 调用 ImmGetDefaultIMEWnd 函数，并传入参数 None
+    h = win32gui.GetForegroundWindow()
+    im_window = ImmGetDefaultIMEWnd(h)
+
+    ret = user32.SendMessageA(im_window, 0x0283, 0x0005, 0)
+    return "中" if ret == 1 else "英"
+
+
+
+def is_admin() -> bool:
+    """
+    检查当前进程是否以管理员权限运行。
+
+    :return: 如果程序以管理员权限运行则返回True，否则返回False。
+    """
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
+
+def run_as_admin(argv: Optional[List[str]] = None, debug: bool = False) -> Optional[bool]:
+    """
+    如果程序不是以管理员权限运行，则尝试以管理员权限重启程序。
+
+    :param argv: 命令行参数列表，默认为None，此时使用sys.argv。
+    :param debug: 是否打印调试信息，默认为False。
+    :return: 如果程序已是管理员权限或重启成功则返回True，用户拒绝提升权限返回False，程序重启中返回None。
+    """
+    shell32 = ctypes.windll.shell32
+    if argv is None and shell32.IsUserAnAdmin():
+        # 如果已经是管理员权限，则直接运行
+        return True
+    else:
+        if argv is None:
+            argv = sys.argv
+        if hasattr(sys, '_MEIPASS'):
+            # 支持PyInstaller打包后的可执行文件
+            arguments = map(str, argv[1:])
+        else:
+            arguments = map(str, argv)
+        argument_line = u' '.join(arguments)
+        executable = str(sys.executable)
+        if debug:
+            print('命令行:', executable, argument_line)
+        ret = shell32.ShellExecuteW(None, "runas", executable, argument_line, None, 1)
+        if ret <= 32:
+            return False
+        return None
+
+
