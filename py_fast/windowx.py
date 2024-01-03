@@ -9,6 +9,7 @@ import traceback
 from os import path
 from pathlib import Path
 from typing import List, Dict, Optional, Callable, Any
+from ctypes import wintypes
 
 import keyboard
 import mouse
@@ -448,4 +449,18 @@ def run_as_admin(executable_path: Optional[str] = None, argv: Optional[list[str]
         return False
     return None
 
+def is_taskbar_hidden() -> bool:
+    """
+    检测Windows任务栏是否被隐藏。
 
+    :return: 如果任务栏被隐藏返回True，否则返回False。
+    """
+    taskbar_hwnd = win32gui.FindWindow("Shell_TrayWnd", None)
+
+    if taskbar_hwnd:
+        # 获取任务栏的窗口状态
+        placement = win32gui.GetWindowPlacement(taskbar_hwnd)
+        # 检查任务栏是否最小化或隐藏
+        return placement[1] == win32con.SW_SHOWMINIMIZED or placement[1] == win32con.SW_HIDE
+
+    return False
