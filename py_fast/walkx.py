@@ -1,7 +1,7 @@
 import ntpath
 from os import walk, path
 from pathlib import Path
-from .osx import *
+from osx import *
 
 
 def walk_files(path_str=None, extension="", *, nopath=False, followlinks=False, glob=None):

@@ -140,26 +140,50 @@ def get_thread_info(thread_id: int) -> Optional[Dict]:
     #     # 如果发生错误，例如线程不存在
     #     return None
 
-def create_shortcut(path: Union[Path, str], name: str, shortcut_path: Optional[Union[Path, str]] = None) -> None:
-    """
-    创建一个快捷方式到指定路径。
-    :param path: 快捷方式指向的目标路径（Path对象或字符串）。
-    :param name: 快捷方式的名称。
-    :param shortcut_path: 快捷方式的保存路径（Path对象或字符串）。如果未提供，则使用目标路径所在的文件夹。
-    """
-    # 确保path是Path对象
-    if not isinstance(path, Path):
-        path = Path(path)
+import os
+import win32com.client
+from typing import Optional, Union
+from pathlib import Path
 
-    # 处理shortcut_path
-    if shortcut_path is None:
-        shortcut_path = path.parent
-    elif not isinstance(shortcut_path, Path):
-        shortcut_path = Path(shortcut_path)
+def create_shortcut(*args: Union[Path, str]) -> None:
+    """
+    创建一个快捷方式到指定路径。可以接收两个或三个参数。
+    - 如果传入两个参数，第一个是源文件/文件夹的路径，第二个是目标文件/文件夹的路径。
+    - 如果传入三个参数，第一个是源文件/文件夹的路径，第二个是快捷方式的名称，第三个是快捷方式的保存路径。
+    :param args: 可变参数，可以是Path对象或字符串。
+    """
+    if len(args) == 2:
+        path, shortcut_path = args
+        name = os.path.basename(path)
+    elif len(args) == 3:
+        path, name, shortcut_path = args
+    else:
+        raise ValueError("Invalid number of arguments. Expected 2 or 3 arguments.")
+
+    # 确保path和shortcut_path是Path对象
+    path = Path(path) if not isinstance(path, Path) else path
+    shortcut_path = Path(shortcut_path) if not isinstance(shortcut_path, Path) else shortcut_path
 
     shell = win32com.client.Dispatch("WScript.Shell")
     shortcut = shell.CreateShortCut(str(shortcut_path.joinpath(name + '.lnk')))
     shortcut.Targetpath = str(path)
     shortcut.WorkingDirectory = str(path.parent)
     shortcut.save()
+
+
+import os
+from pathlib import Path
+from typing import Union
+
+def create_hard_link(source: Union[Path, str], link_name: Union[Path, str]) -> None:
+    """
+    创建一个指向文件的硬链接。
+    :param source: 源文件的路径（可以是Path对象或字符串）。
+    :param link_name: 硬链接的路径（可以是Path对象或字符串）。
+    """
+    source = Path(source) if not isinstance(source, Path) else source
+    link_name = Path(link_name) if not isinstance(link_name, Path) else link_name
+
+    os.link(source, link_name)
+
 
