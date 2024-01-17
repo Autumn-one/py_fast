@@ -1,6 +1,10 @@
 # 系统相关功能, 包含进程的获取等
 import ctypes
 import os, win32api, win32gui, win32process
+import os
+import win32com.client
+from typing import Optional, Union
+from pathlib import Path
 
 __all__ = (
     "get_env",
@@ -135,3 +139,27 @@ def get_thread_info(thread_id: int) -> Optional[Dict]:
     # except Exception as e:
     #     # 如果发生错误，例如线程不存在
     #     return None
+
+def create_shortcut(path: Union[Path, str], name: str, shortcut_path: Optional[Union[Path, str]] = None) -> None:
+    """
+    创建一个快捷方式到指定路径。
+    :param path: 快捷方式指向的目标路径（Path对象或字符串）。
+    :param name: 快捷方式的名称。
+    :param shortcut_path: 快捷方式的保存路径（Path对象或字符串）。如果未提供，则使用目标路径所在的文件夹。
+    """
+    # 确保path是Path对象
+    if not isinstance(path, Path):
+        path = Path(path)
+
+    # 处理shortcut_path
+    if shortcut_path is None:
+        shortcut_path = path.parent
+    elif not isinstance(shortcut_path, Path):
+        shortcut_path = Path(shortcut_path)
+
+    shell = win32com.client.Dispatch("WScript.Shell")
+    shortcut = shell.CreateShortCut(str(shortcut_path.joinpath(name + '.lnk')))
+    shortcut.Targetpath = str(path)
+    shortcut.WorkingDirectory = str(path.parent)
+    shortcut.save()
+
