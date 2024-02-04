@@ -1,7 +1,6 @@
 # py_fast
  <img style="width: 100px;display: block;" src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png?_gl=1*o754mn*_ga*MjA2MjYyNTE4Ni4xNjc2MjU3OTMx*_ga_9J976DJZ68*MTY3NzI5NTIxOS4xMi4xLjE2NzcyOTUyMjEuMC4wLjA.&_ga=2.150998014.650236529.1677295220-2062625186.1676257931"></img>
 
-希望做windows下最好的系统操作python库, 如果有人发现比我这个更好的库请及时告知我, 在确认之后我会删除这个介绍。
 该库目前提供如下功能模块: 剪切板操作(支持多文件和多目录) 系统文件和目录操作(新建,删除,读取,写入,复制,移动, 重命名,通配符,递归等) 控制台颜色打印 路径操作 对象存储与转换操作 这个库的目标是尽可能的为windows的所有常用操作提供一个对应的可以直达的函数，且兼具灵活、一致、稳定的特点，完美替代难用的 cmd 等工具
 
 这个库还在持续开发中，其功能还远没有达到我设想的那样，整个库的运作模式我早已想好，这个也是做给自己用的，如果你有真正的自己的想法而且对我的这个目标感兴趣也欢迎参与开发。
