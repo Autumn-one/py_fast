@@ -1,5 +1,5 @@
 import random
-import time
+import pygame
 
 # 定义游戏参数
 SCREEN_WIDTH = 600
@@ -7,7 +7,7 @@ SCREEN_HEIGHT = 400
 BLOCK_SIZE = 20
 
 # 定义游戏对象
-class Block:
+class Plane:
   def __init__(self, x, y, shape):
     self.x = x
     self.y = y
@@ -117,5 +117,5 @@ while True:
 
   # 判断是否满行
   if tetris.is_full():
-    # TODO: 处理
-   ...
+    # TODO: 处理满行
+    ...
