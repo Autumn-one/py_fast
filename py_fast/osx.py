@@ -10,6 +10,7 @@ from pprint import pformat
 import copy as cp
 from easyx import *
 import os
+from typing import Tuple, List, Optional
 
 
 def get_dirs(path_str=None, nopath=False):
@@ -350,3 +351,20 @@ def rename_dir(src, name):
         rename(src, name)
     else:
         raise Exception(f"{src}不是一个文件或者不存在")
+
+def count_files(directory: str, extension: str) -> int:
+    """
+    此函数用于统计指定文件夹及其子文件夹中，指定后缀的文件数量
+    :param directory: 传入的目录路径，应为字符串
+    :param extension: 需要统计的文件后缀，如 ".txt", ".csv", ".jpg" 等
+    :return: 返回指定后缀的文件数量
+    """
+    count = 0  # 初始化数量为0
+    # 使用os.walk遍历directory目录及其子目录
+    for root, dirs, files in os.walk(directory):
+        # 在文件中,如果文件的后缀名与参数extension相同，计数器加一
+        for file in files:
+            if file.endswith(extension):
+                count += 1
+    # 返回数量
+    return count
