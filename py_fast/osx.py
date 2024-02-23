@@ -387,3 +387,40 @@ def change_file_creation_time(filename: str, new_time: str) -> None:
     cfile.SetFileTime(handle, ctypes.byref(ctime_low), None, None)   # 设置文件创建时间
     cfile.CloseHandle(handle)
 
+
+def change_file_modification_time(filename: str, new_time: str):
+    """
+    修改指定文件的修改时间
+    :param filename: 需要修改的文件名
+    :param new_time: 新的修改时间，格式为"YYYY-MM-DD HH:MM:SS"
+    """
+    mtime = time.mktime(time.strptime(new_time, "%Y-%m-%d %H:%M:%S"))  #转换为时间戳
+    mtime_low = ctypes.c_uint32(int(mtime) & 0xFFFFFFFF)  #低位
+    mtime_high = ctypes.c_uint32(int(mtime) >> 32)  #高位
+
+    cfile = ctypes.CDLL('Kernel32.dll')  #加载库
+    #创建文件句柄
+    handle = cfile.CreateFileW(filename, ctypes.c_uint32(0x10000000), 0, None, 3, 0x80, None)
+    if handle == -1:
+        raise ctypes.WinError()
+
+    #设定修改时间
+    cfile.SetFileTime(handle, None, None, ctypes.byref(ctime_low))
+    cfile.CloseHandle(handle)  #关闭句柄
+
+
+def rename_files(directory: str, prefix: str):
+    """
+    批量修改指定文件夹中的所有文件名
+    :param directory: 需要修改的文件夹路径
+    :param prefix: 新的文件名前缀
+    """
+    for filename in os.listdir(directory):
+        # 组合出新的文件名
+        new_filename = prefix + '_' + os.path.basename(filename)
+        # 获取原文件的完整路径
+        old_file = os.path.join(directory, filename)
+        # 组合出修改后的文件名路径
+        new_file = os.path.join(directory, new_filename)
+        # 重命名文件
+        os.rename(old_file, new_file)
