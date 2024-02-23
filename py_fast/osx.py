@@ -368,3 +368,22 @@ def count_files(directory: str, extension: str) -> int:
                 count += 1
     # 返回数量
     return count
+
+
+def change_file_creation_time(filename: str, new_time: str) -> None:
+    """
+    修改指定文件的创建时间
+    :param filename: 需要修改的文件名
+    :param new_time: 新的创建时间，格式为"YYYY-MM-DD HH:MM:SS"
+    """
+    ctime = time.mktime(time.strptime(new_time, "%Y-%m-%d %H:%M:%S"))  # 转换为时间戳
+
+    cfile = ctypes.CDLL('Kernel32.dll')
+    handle = cfile.CreateFileW(filename, ctypes.c_uint32(0x10000000), 0, None, 3, 0x80, None)
+    if handle == -1:  # 如果返回-1，那么代表创建文件句柄失败。
+        raise ctypes.WinError()
+    ctime_low = ctypes.c_uint32(int(ctime) & 0xFFFFFFFF)  # 取低位
+    ctime_high = ctypes.c_uint32(int(ctime) >> 32)  # 取高位
+    cfile.SetFileTime(handle, ctypes.byref(ctime_low), None, None)   # 设置文件创建时间
+    cfile.CloseHandle(handle)
+
