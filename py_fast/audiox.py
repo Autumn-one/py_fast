@@ -2,7 +2,8 @@ import pyaudio
 import wave
 import threading
 import time
-
+import noisereduce as nr
+from scipy.io import wavfile
 
 class AudioFile:
     CHUNK = 1024
@@ -64,3 +65,13 @@ def video_to_audio(video_file_name, audio_file_name):
     video = VideoFileClip(video_file_name)
     audio = video.audio
     audio.write_audiofile(audio_file_name)
+
+def reduce_noise(audio_file):
+    # 读取音频文件
+    rate, data = wavfile.read(audio_file)
+
+    # 使用noisereduce库降噪
+    reduced_noise = nr.reduce_noise(audio_clip=data, noise_clip=data)
+
+    # 将降噪后的音频写入到新的文件
+    wavfile.write("reduced_noise.wav", rate, reduced_noise)
