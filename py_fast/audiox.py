@@ -55,3 +55,12 @@ class AudioFile:
         """在完成后，关闭流"""
         self.stream.close()
         self.p.terminate()
+
+
+def video_to_audio(video_file_name, audio_file_name):
+    """
+        根据视频文件提取出音频文件
+    """
+    video = VideoFileClip(video_file_name)
+    audio = video.audio
+    audio.write_audiofile(audio_file_name)
