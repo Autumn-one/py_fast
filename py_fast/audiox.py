@@ -4,6 +4,9 @@ import threading
 import time
 import noisereduce as nr
 from scipy.io import wavfile
+from gtts import gTTS
+import os
+from typing import Optional
 
 class AudioFile:
     CHUNK = 1024
@@ -75,3 +78,16 @@ def reduce_noise(audio_file):
 
     # 将降噪后的音频写入到新的文件
     wavfile.write("reduced_noise.wav", rate, reduced_noise)
+
+def text_to_speech(text: str, output_file: str, lang: Optional[str]='zh-cn') -> None:
+    """
+    文字转语音
+    """
+    # 使用输入的语言代码创建一个语音合成器，如果没有指定，则默认为中文
+    tts = gTTS(text=text, lang=lang)
+
+    # 将生成的语音保存为mp3文件
+    tts.save(output_file)
+
+    # 代码暂时不会播放生成的音频文件，如果需要播放可以取消下一行的注释
+    # os.system("mpg321 " + output_file)
