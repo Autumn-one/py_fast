@@ -7,6 +7,7 @@ from scipy.io import wavfile
 from gtts import gTTS
 import os
 from typing import Optional
+import speech_recognition as sr
 
 class AudioFile:
     CHUNK = 1024
@@ -91,3 +92,16 @@ def text_to_speech(text: str, output_file: str, lang: Optional[str]='zh-cn') -> 
 
     # 代码暂时不会播放生成的音频文件，如果需要播放可以取消下一行的注释
     # os.system("mpg321 " + output_file)
+
+def speech_to_text(audio_file):
+    """
+    语音转文字功能
+    """
+    # 初始化识别器
+    r = sr.Recognizer()
+
+    # 读取音频文件
+    with sr.AudioFile(audio_file) as source:
+        audio_data = r.record(source)
+        text = r.recognize_google(audio_data, language='zh-CN')
+        return text
