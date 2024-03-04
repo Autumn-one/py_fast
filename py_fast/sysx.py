@@ -5,6 +5,8 @@ import os
 import win32com.client
 from typing import Optional, Union
 from pathlib import Path
+import string
+import random
 
 __all__ = (
     "get_env",
@@ -186,4 +188,13 @@ def create_hard_link(source: Union[Path, str], link_name: Union[Path, str]) -> N
 
     os.link(source, link_name)
 
+def generate_password(length=8):
+    # 所有可能的字符包括大写、小写字母和数字
+    all_characters = string.ascii_letters + string.digits
 
+    # 如果你还需要添加标点符号，可以在上面的行里加入 string.punctuation
+
+    # 使用 random.choice 随机选择字符，组成密码
+    password = ''.join(random.choice(all_characters) for _ in range(length))
+
+    return password
