@@ -7,6 +7,10 @@ from typing import Optional, Union
 from pathlib import Path
 import string
 import random
+from ctypes import wintypes
+from typing import Optional, List, Tuple, Dict
+import win32con
+
 
 __all__ = (
     "get_env",
@@ -16,13 +20,6 @@ __all__ = (
     "get_front_window_process",
     "get_process_threads"
 )
-
-from ctypes import wintypes
-
-from typing import Optional, List, Tuple, Dict
-
-import win32con
-
 
 def get_env(env_str: str):
     """
