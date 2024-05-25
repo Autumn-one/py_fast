@@ -1,14 +1,14 @@
 from os import walk, listdir, path
 from pathlib import Path
-from pathx import *  # 导入所有的路径增强函数
-from walkx import *  # 导入所有的递归访问文件夹的方法
+from .pathx import *  # 导入所有的路径增强函数
+from .walkx import *  # 导入所有的递归访问文件夹的方法
 import shutil  # 导入文件的高级操作部分
 import json
 import ast
-import clipx
+from . import clipx
 from pprint import pformat
 import copy as cp
-from easyx import *
+from .easyx import *
 import os
 from typing import Tuple, List, Optional
 

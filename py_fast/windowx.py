@@ -22,7 +22,7 @@ from win32com.client import Dispatch
 __all__ = (
     'get_log_time', 'get_source_path', 'error_log', 'get_real_path', 'send_ctrl_c', 'get_front_window_path',
     'is_frozen',
-    'parse_argv', 'get_all_process_path', 'get_window_titles_and_processes', 'move_window')
+    'parse_argv', 'get_all_process_path', 'get_window_titles_and_processes', 'move_window', 'get_active_window_coords')
 
 
 def parse_argv():
@@ -191,6 +191,17 @@ def get_front_window_path():
 def get_front_window():
     """获取最前面的窗口句柄"""
     return win32gui.GetForegroundWindow()
+
+def get_active_window_coords():
+    # 获取当前激活窗口的句柄
+    hwnd = win32gui.GetForegroundWindow()
+    # 获取窗口的坐标
+    rect = win32gui.GetWindowRect(hwnd)
+    x = rect[0]
+    y = rect[1]
+    w = rect[2] - x
+    h = rect[3] - y
+    return (x, y, w, h)
 
 
 def set_front_window(hwnd):
